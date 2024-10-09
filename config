@@ -1,0 +1,27 @@
+server {
+	server_name	localhost;
+	listen		80;
+	error_page	 404 /404.html;
+	client_max_body_size	10m;
+}
+server {
+	server_name	salut.com;
+	listen		80;
+	error_page  404 403 402 /404.html;
+	client_max_body_size 100m;
+	location / {
+		cgi .php .htm .html /usr/bin/php-cgi;
+		cgi .htmx /usr/bin/htmx-cgi;
+		limit_except GET POST PUT; 
+		root /var/www/;
+		autoindex on; // enable directory listing
+		index index.html index.php; // if this is not specified or the file doesnt exist, it will show the directory listing (if enabled otherwise 404)
+		
+	}
+	location /thing/ {
+		
+	}
+	location /index.html {
+		
+	}
+}

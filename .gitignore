@@ -1,0 +1,9 @@
+obj
+webserv
+ubuntu_tester
+ubuntu_cgi_tester
+config.json
+.vscode
+*.o
+*.d
+*.out
