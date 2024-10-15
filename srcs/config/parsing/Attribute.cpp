@@ -6,10 +6,13 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:55:08 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/09 14:27:20 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/10/15 17:47:04 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdexcept>
+#include <string>
+#include <sstream>
 #include "Attribute.hpp"
 
 Attribute::Attribute(void) {}
@@ -57,8 +60,23 @@ const std::vector<std::string> &Attribute::getParameters(void) const {
 	return (this->_parameters);
 }
 
+const std::vector<std::string> &Attribute::getParameters(size_t assert_count) const {
+	if (this->_parameters.size() != assert_count)
+	{
+		std::stringstream ss;
+		ss << "Attribute '" << this->_name << "' must have " << assert_count << " parameters";
+		throw std::runtime_error(ss.str());
+	}
+	return (this->_parameters);
+}
+
 const std::vector<Attribute> &Attribute::getChildren(void) const {
 	return (this->_children);
+}
+
+void	Attribute::assertNoChild() const {
+	if (!this->_children.empty())
+		throw std::runtime_error("Attribute '" + this->_name + "' must have no children");
 }
 
 std::ostream &operator<<(std::ostream &o, const Attribute &attr) {
@@ -70,9 +88,9 @@ std::ostream &operator<<(std::ostream &o, const Attribute &attr) {
 	}
 	if (attr.getChildren().size() != 0) {
 		o << "], \"children\": [";
-		for (size_t i = 0; i < attr.getChildren().size(); i++) {
-			o << attr.getChildren()[i];
-			if (i + 1 < attr.getChildren().size())
+		for (std::vector<Attribute>::const_iterator it = attr.getChildren().begin(); it != attr.getChildren().end();) {
+			o << *it;
+			if (++it != attr.getChildren().end())
 				o << ", ";
 		}
 	}

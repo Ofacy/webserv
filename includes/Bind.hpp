@@ -1,37 +1,45 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Configuration.hpp                                  :+:      :+:    :+:   */
+/*   Bind.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/09 11:08:06 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 18:26:32 by lcottet          ###   ########lyon.fr   */
+/*   Created: 2024/10/09 17:36:38 by lcottet           #+#    #+#             */
+/*   Updated: 2024/10/10 18:11:32 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONFIGURATION_HPP
-# define CONFIGURATION_HPP
+#ifndef BIND_HPP
+# define BIND_HPP
 
-# include "Bind.hpp"
 # include "Server.hpp"
-# include <vector>
+# include <stdint.h>
 # include <string>
 
-class Configuration {
+class Bind {
 	public:
-		Configuration(void);
-		Configuration(const Configuration &src);
-		Configuration(const std::string &config_path);
-		~Configuration(void);
+		Bind(void);
+		Bind(const Bind &src);
+		Bind(const std::string &host, int port);
 
-		Configuration &operator=(const Configuration &rhs);
+		~Bind(void);
 
+		Bind &operator=(const Bind &rhs);
+
+		const std::string	&getHost(void) const;
+		int					getPort(void) const;
+
+		void				listen(void);
+
+		void				push_server(const Server &server);
 	private:
-		
-		void				_assignServer(const Attribute &server_attribute);
-		Bind				&_getBind(const Server &server);
-		std::vector<Bind>	_binds;
+		uint32_t			_getHost(void) const;
+		std::vector<Server>	_servers;
+		int					_port;
+		std::string			_host;
+		int					_fd;
+
 };
 
 #endif

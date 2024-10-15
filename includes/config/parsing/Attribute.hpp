@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 12:18:42 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/09 16:17:45 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/10/15 18:11:12 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define ATTRIBUTE_HPP
 
 # include "Lexer.hpp"
+# include <map>
 # include <iostream>
 # include <vector>
 # include <string>
@@ -28,9 +29,13 @@ class Attribute {
 
 		Attribute &operator=(const Attribute &rhs);
 
-		const std::string				&getName(void) const;
-		const std::vector<std::string>	&getParameters(void) const;
-		const std::vector<Attribute>	&getChildren(void) const;
+		const std::string										&getName(void) const;
+		const std::vector<std::string>							&getParameters(void) const;
+		const std::vector<std::string>							&getParameters(size_t assert_count) const;
+
+		const std::vector<Attribute>							&getChildren(void) const;
+
+		void													assertNoChild() const;
 	private:
 		std::string					_name;
 		std::vector<std::string>	_parameters;

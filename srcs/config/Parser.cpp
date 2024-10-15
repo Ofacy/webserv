@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:46:53 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/09 16:17:45 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/10/10 16:38:31 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,9 @@ void Parser::_parse(void) {
 std::ostream &operator<<(std::ostream &o, const Parser &rhs) {
 	o << "[";
 	for (size_t i = 0; i < rhs.getAttributes().size(); i++) {
-		o << rhs.getAttributes()[i] << ", ";
+		o << rhs.getAttributes()[i];
+		if (i + 1 < rhs.getAttributes().size())
+			o << ", ";
 	}
 	o << "]";
 	return (o);

@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 12:56:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/09 16:17:45 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/10/10 16:35:48 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ TokenType	Lexer::_getTokenType(char c) const {
 	if (c == '}')
 		return (CLOSE_BRACE);
 	if (this->_word_chars.find(c) == std::string::npos)
-		throw std::runtime_error("Invalid character in input");
+		throw std::runtime_error(std::string("Invalid '") + c + "' character in input");
 	return (WORD);
 }
 

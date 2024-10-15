@@ -6,7 +6,7 @@
 #    By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/10/09 16:17:45 by lcottet          ###   ########lyon.fr    #
+#    Updated: 2024/10/15 17:47:14 by lcottet          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,11 +16,11 @@ CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -MMD -MP -g3
 
 SRCS_DIR = srcs
 
-SRCS =	main.cpp
+SRCS =	main.cpp Configuration.cpp Server.cpp Location.cpp Bind.cpp
 
 CONFIG_SRCS = Parser.cpp
 
-PARSING_SRCS =	Attribute.cpp Lexer.cpp Token.cpp
+PARSING_SRCS =	Attribute.cpp Lexer.cpp Token.cpp AAttributeParser.cpp
 
 SRCS += $(PARSING_SRCS:%.cpp=config/parsing/%.cpp) 
 SRCS += $(CONFIG_SRCS:%.cpp=config/%.cpp)
