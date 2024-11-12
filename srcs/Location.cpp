@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 16:25:45 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 19:10:38 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/12 15:45:34 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ Location::Location(const Attribute &root) {
 	this->_allowed_methods[0] = "GET";
 	this->_allowed_methods[1] = "POST";
 	this->_allowed_methods[2] = "DELETE";
+	this->_path = root.getParameters(1)[0];
 	this->parse(root, std::vector<std::string>(1, "root"));
 }
 

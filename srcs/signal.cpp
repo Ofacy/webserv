@@ -1,34 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   signal.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/09 10:46:31 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/12 16:01:44 by bwisniew         ###   ########.fr       */
+/*   Created: 2024/11/12 15:57:19 by bwisniew          #+#    #+#             */
+/*   Updated: 2024/11/12 18:10:34 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #include "Configuration.hpp"
-#include "Bind.hpp"
-#include <fstream>
-#include <iostream>
-#include <string>
+#include <csignal>
 
-void	setup_signal();
+void	handle_signal(int signum) {
+	(void)signum;
+	Configuration::exit();
+}
 
-int main(int argc, char **argv) {
-	std::string config_path = "config";
-
-	if (argc > 2) {
-		std::cerr << argv[0] << " [configfile]" << std::endl;
-		return (1);
-	}
-	else if (argc == 2) {
-		config_path = argv[1];
-	}
-	setup_signal();
-	Configuration config(config_path);
-	return (0);
+void	setup_signal() {
+	signal(SIGINT, handle_signal);
+	signal(SIGTERM, handle_signal);
+	signal(SIGQUIT, handle_signal);
 }
