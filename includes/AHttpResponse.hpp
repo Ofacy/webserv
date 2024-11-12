@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 16:38:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/12 19:07:09 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/12 19:26:28 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,16 @@ public:
 	AHttpResponse &operator=(const AHttpResponse &rhs);
 
 	virtual IPollElement	*getPollElement();
-
-	virtual int				updateBodyBuffer(std::string &body_buffer);
 	virtual int				writeResponse(int fd);
-
+protected:
+	HttpRequest		&getRequest();
+	void			setBufferDone(bool done);
+	bool			isBufferDone() const;
+	bool			isHeaderReady() const = 0;
 private:
 	HttpRequest		&_request;
 	std::string		_write_buffer;
+	bool			_buffer_done;
 	
 };
 
