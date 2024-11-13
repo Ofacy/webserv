@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:35:52 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/12 18:47:52 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/13 16:42:42 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class HttpRequest : public HttpMessage {
 		const std::string	&getVersion(void) const;
 
 		HttpRequestState	getState(void) const;
+		bool				isDone(void) const;
 		bool				isHeaderDone(void) const;
 
 		void				update(char *buffer, size_t size);

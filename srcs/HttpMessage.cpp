@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:29 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/12 18:10:34 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/13 17:11:46 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ HttpMessage	&HttpMessage::operator=(const HttpMessage &rhs) {
 	if (this == &rhs)
 		return (*this);
 	this->_headers = rhs._headers;
-	this->_body = rhs._body;
 	return (*this);
 }
 
@@ -40,14 +39,6 @@ std::string HttpMessage::getHeader(const std::string &key) const {
 	return (it->second);
 }
 
-const std::string	&HttpMessage::getBody(void) const {
-	return (this->_body);
-}
-
 void		HttpMessage::setHeader(const std::string &key, const std::string &value) {
 	this->_headers[key] = value;
-}
-
-void		HttpMessage::setBody(const std::string &body) {
-	this->_body = body;
 }

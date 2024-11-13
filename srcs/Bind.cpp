@@ -6,10 +6,12 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:19 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/12 16:16:05 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/13 18:21:59 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Configuration.hpp"
+#include "StatusHttpResponse.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -129,4 +131,14 @@ int	Bind::update(struct pollfd &pollfd, Configuration &config) {
 		config.addPollElement(client);
 	}
 	return (1);
+}
+
+AHttpResponse *Bind::getResponse(HttpRequest & request, Configuration &config)
+{
+	for (std::vector<Server>::reverse_iterator it = this->_servers.rbegin(); it != this->_servers.rend(); it++)
+	{
+		if (it->hasName(request.getHeader("Host")))
+			return (it->getResponse(request));
+	}
+	return (config.getErrorResponse(request, 404));
 }

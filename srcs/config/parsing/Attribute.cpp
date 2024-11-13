@@ -3,19 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   Attribute.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:55:08 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 17:47:04 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/13 17:44:57 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #include <stdexcept>
 #include <string>
 #include <sstream>
 #include "Attribute.hpp"
 
-Attribute::Attribute(void) {}
+Attribute::Attribute(void) : _name("root") {}
 
 Attribute::Attribute(const Attribute &src) {
 	*this = src;
@@ -72,6 +73,10 @@ const std::vector<std::string> &Attribute::getParameters(size_t assert_count) co
 
 const std::vector<Attribute> &Attribute::getChildren(void) const {
 	return (this->_children);
+}
+
+void	Attribute::pushChild(const Attribute &child) {
+	this->_children.push_back(child);
 }
 
 void	Attribute::assertNoChild() const {

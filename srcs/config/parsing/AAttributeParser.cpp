@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AAttributeParser.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:24:44 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 18:09:45 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/13 17:58:49 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,21 @@ AAttributeParser::AAttributeParser(const AAttributeParser &src) {
 	*this = src;
 }
 
+AAttributeParser & AAttributeParser::operator=(const AAttributeParser & rhs)
+{
+	if (this == &rhs)
+		return (*this);
+	this->_object_name = rhs._object_name;
+	return (*this);
+}
+
 AAttributeParser::~AAttributeParser(void) {}
 
 void	AAttributeParser::parse(const Attribute &root, std::vector<std::string> mandatory_childs) {
 	this->_object_name = root.getName();
 	for(std::vector<Attribute>::const_iterator it = root.getChildren().begin(); it != root.getChildren().end(); it++){
-		this->parseAttribute(*it);
+		if (!this->parseAttribute(*it))
+			throw InvalidAttributeException(it->getName(), this->_object_name);
 		this->_defined_children.push_back(it->getName());
 	}
 	for (std::vector<std::string>::const_iterator it = mandatory_childs.begin(); it != mandatory_childs.end(); it++) {

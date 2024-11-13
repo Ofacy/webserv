@@ -1,29 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   IPollElement.hpp                                   :+:      :+:    :+:   */
+/*   StatusHttpResponse.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/12 15:19:35 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 17:11:12 by bwisniew         ###   ########.fr       */
+/*   Created: 2024/11/13 16:43:52 by lcottet           #+#    #+#             */
+/*   Updated: 2024/11/13 16:53:32 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef IPOLL_ELEMENT_HPP
-# define IPOLL_ELEMENT_HPP
+#ifndef STATUSHTTPRESPONSE_HPP
+# define STATUSHTTPRESPONSE_HPP
 
-# include <poll.h>
+# include "AHttpResponse.hpp"
 
-class Configuration;
-
-class IPollElement
-{
+class StatusHttpResponse : public AHttpResponse {
 public:
-	virtual 		~IPollElement() {};
-	virtual int		getFd() const = 0;
-	virtual short	getEvents() const = 0;
-	virtual int		update(struct pollfd &pollfd, Configuration &config) = 0;
+	StatusHttpResponse(HttpRequest &request, uint16_t code);
+	StatusHttpResponse(StatusHttpResponse const & src);
+	~StatusHttpResponse(void);
+
+	StatusHttpResponse & operator=(StatusHttpResponse const & rhs);
 };
 
 #endif

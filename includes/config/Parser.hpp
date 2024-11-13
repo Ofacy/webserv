@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:46:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/10/15 18:48:17 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/13 17:43:16 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,11 @@ class Parser
 
 		Parser &operator=(const Parser &rhs);
 
-		const std::vector<Attribute>	&getAttributes(void) const;
-		const Attribute 				&getAttribute(const std::string &name) const;
+		const Attribute					&getRoot(void) const;
 
 	private:
 		Lexer					&_lexer;
-		std::vector<Attribute>	_attributes;
+		Attribute				_root;
 
 		void	_parse(void);
 };

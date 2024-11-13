@@ -6,24 +6,22 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:08:06 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/12 19:26:11 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/13 19:26:17 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIGURATION_HPP
 # define CONFIGURATION_HPP
 
+# include "IPollElement.hpp"
 # include "Bind.hpp"
 # include "Server.hpp"
-# include "Client.hpp"
-# include "IPollElement.hpp"
 # include <vector>
 # include <string>
 
-class IPollElement;
-class Bind;
+class Client;
 
-class Configuration {
+class Configuration : public InheritedParameters {
 	public:
 		Configuration(void);
 		Configuration(const Configuration &src);
@@ -35,7 +33,7 @@ class Configuration {
 		static 			void	exit();
 
 	private:
-		
+		bool						parseAttribute(const Attribute &child);
 		void						_assignServer(const Attribute &server_attribute);
 		Bind						&_getBind(const Server &server);
 

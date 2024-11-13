@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/12 19:26:11 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/13 18:08:59 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,7 @@ Configuration::Configuration(const std::string &config_path) {
 	Lexer lexer(file);
 	Parser parser(lexer);
 	std::cout << parser << std::endl;
-	for (size_t i = 0; i < parser.getAttributes().size(); i++) {
-		if (parser.getAttributes()[i].getName() == "server") {
-			this->_assignServer(parser.getAttributes()[i]);
-		}
-		else
-			throw std::runtime_error("Configuration file contains unknown attribute (expecting only 'server' on root)");
-	}
+	this->parse(parser.getRoot(), std::vector<std::string>());
 	this->_poll();
 }
 
@@ -65,6 +59,17 @@ void	Configuration::addPollElement(IPollElement *poll_element) {
 	pollfd.revents = 0;
 	this->_poll_elements.push_back(poll_element);
 	this->_pollfds.push_back(pollfd);
+}
+
+bool	Configuration::parseAttribute(const Attribute &child) {
+	if (InheritedParameters::parseAttribute(child))
+		return (true);
+	if (child.getName() == "server")
+	{
+		this->_assignServer(child);
+		return (true);
+	}
+	return (false);
 }
 
 void Configuration::_assignServer(const Attribute &server_attribute) {
@@ -109,6 +114,7 @@ void Configuration::_poll() {
 			if (poll_element->update(this->_pollfds[i], *this) <= 0)
 			{
 				this->_poll_elements.erase(this->_poll_elements.begin() + i);
+				delete poll_element;
 				this->_pollfds.erase(this->_pollfds.begin() + i);
 				i--;
 			}

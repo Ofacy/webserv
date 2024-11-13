@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 16:19:55 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 18:19:38 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/13 18:21:34 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,23 @@
 # include <map>
 # include <vector>
 # include <string>
-# include "AAttributeParser.hpp"
+# include "InheritedParameters.hpp"
 # include "Attribute.hpp"
 
-class Location : public AAttributeParser {
+class Location : public InheritedParameters {
 	public:
 		Location(void);
 		Location(const Location &src);
-		Location(const Attribute &root);
+		Location(const Attribute &root, const InheritedParameters &inherited);
 
 		~Location(void);
 
 		Location &operator=(const Location &rhs);
 
 		const std::string	&getPath(void) const;
-
+		AHttpResponse		*getResponse(HttpRequest &request) const;
 	private:
-		void	parseAttribute(const Attribute &child);
+		bool	parseAttribute(const Attribute &child);
 
 		std::string					_path;
 		size_t						_max_body_size;

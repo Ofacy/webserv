@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/12 18:48:30 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/13 17:46:08 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,10 @@ const std::string	&HttpRequest::getUri(void) const {
 
 HttpRequest::HttpRequestState	HttpRequest::getState(void) const {
 	return (this->_state);
+}
+
+bool	HttpRequest::isDone(void) const {
+	return (this->_state == DONE || this->_state == INVALID);
 }
 
 bool	HttpRequest::isHeaderDone(void) const {
