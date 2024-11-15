@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 17:38:57 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 19:02:54 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,4 +123,9 @@ std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
 void AHttpResponse::appendBody(char * data, size_t size)
 {
 	this->_write_buffer.append(data, size);
+}
+
+void AHttpResponse::appendBody(const std::string & data)
+{
+	this->_write_buffer.append(data);
 }

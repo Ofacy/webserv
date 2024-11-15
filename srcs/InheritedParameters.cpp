@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 17:39:08 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 19:15:42 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <algorithm>
 #include "StatusHttpResponse.hpp"
 #include "FileHttpResponse.hpp"
+#include "DirHttpResponse.hpp"
 #include "InheritedParameters.hpp"
 
 InheritedParameters::InheritedParameters(void) {
@@ -191,6 +192,6 @@ AHttpResponse *InheritedParameters::_getDirectoryResponse(HttpRequest &request, 
 		}
 	}
 	if (this->_autoindex)
-		return (this->getErrorResponse(request, 501, root));
+		return (new DirHttpResponse(request, 200, path));
 	return (this->getErrorResponse(request, 404, root));
 }
