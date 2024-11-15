@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:20:50 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 18:21:13 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:30:40 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ Server::~Server(void) {}
 Server &Server::operator=(const Server &rhs) {
 	if (this == &rhs)
 		return (*this);
+	InheritedParameters::operator=(rhs);
 	this->_locations = rhs._locations;
 	this->_server_names = rhs._server_names;
 	return (*this);

@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 16:32:48 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:39:08 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ bool	InheritedParameters::parseAttribute(const Attribute &child) {
 	else if (child.getName() == "index") {
 		this->assertNotAlreadyDefined("index");
 		this->_index = child.getParameters();
+		//std::cout << "Index size: " << this->_index.size() << std::endl;
 		return (true);
 	}
 	else if (child.getName() == "error_page") {
@@ -140,7 +141,7 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 	if (stat(path.c_str(), &buffer) == -1)
 		return (this->getErrorResponse(request, 404, root));
 	if (S_ISDIR(buffer.st_mode)) {
-		return (this->_getDirectoryResponse(request, path));
+		return (this->_getDirectoryResponse(request, path, root));
 	}
 	else {
 		int fd = open(path.c_str(), O_RDONLY);
@@ -153,8 +154,21 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 
 AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const uint16_t status_code, const std::string & root) const
 {
-	(void)root;
-	return new StatusHttpResponse(request, status_code);
+	std::map<uint16_t, std::string>::const_iterator it = this->_error_pages.find(status_code);
+	if (it == this->_error_pages.end())
+		return (new StatusHttpResponse(request, status_code));
+	struct stat buffer;
+	std::string path = root + it->second;
+
+	std::cout << "Error page path: " << path << std::endl;
+	if (stat(path.c_str(), &buffer) == -1)
+		return (new StatusHttpResponse(request, status_code));
+	if (S_ISDIR(buffer.st_mode))
+		return (this->_getDirectoryResponse(request, path, root));
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd == -1)
+		return (new StatusHttpResponse(request, status_code));
+	return (new FileHttpResponse(request, status_code, fd, buffer));
 }
 
 AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const uint16_t status_code) const
@@ -162,7 +176,21 @@ AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const
 	return InheritedParameters::getErrorResponse(request, status_code, "");
 }
 
-AHttpResponse *InheritedParameters::_getDirectoryResponse(HttpRequest &request, const std::string &path) const {
+AHttpResponse *InheritedParameters::_getDirectoryResponse(HttpRequest &request, const std::string &path, const std::string &root) const {
 	(void)path;
-	return (new StatusHttpResponse(request, 501));
+	for (std::vector<std::string>::const_iterator it = this->_index.begin(); it != this->_index.end(); it++) {
+		std::string index_path = path + "/" + *it;
+		struct stat buffer;
+		if (stat(index_path.c_str(), &buffer) == -1)
+			continue ;
+		if (S_ISREG(buffer.st_mode)) {
+			int fd = open(index_path.c_str(), O_RDONLY);
+			if (fd == -1)
+				continue ;
+			return (new FileHttpResponse(request, 200, fd, buffer));
+		}
+	}
+	if (this->_autoindex)
+		return (this->getErrorResponse(request, 501, root));
+	return (this->getErrorResponse(request, 404, root));
 }

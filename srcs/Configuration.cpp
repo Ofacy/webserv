@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/15 17:02:47 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:30:49 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ Configuration::~Configuration(void) {
 Configuration &Configuration::operator=(const Configuration &rhs) {
 	if (this == &rhs)
 		return (*this);
+	InheritedParameters::operator=(rhs);
 	this->_binds = rhs._binds;
 	return (*this);
 }

@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:30:26 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 18:23:26 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:35:24 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class InheritedParameters : public AAttributeParser {
 		AHttpResponse							*getErrorResponse(HttpRequest &request, const uint16_t status_code) const;
 		const std::string						getErrorPage(HttpRequest &request, const uint16_t status_code, const std::string &root) const;
 	private:
-		AHttpResponse							*_getDirectoryResponse(HttpRequest &request, const std::string &path) const;
+		AHttpResponse							*_getDirectoryResponse(HttpRequest &request, const std::string &path, const std::string &root) const;
 
 		size_t								_max_body_size;
 		std::vector<std::string>			_allowed_methods;
