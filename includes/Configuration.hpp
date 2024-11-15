@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:08:06 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 19:26:17 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:47:52 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Configuration : public InheritedParameters {
 
 		Configuration	&operator=(const Configuration &rhs);
 		void			addPollElement(IPollElement *poll_element);
+		void			removePollElement(IPollElement *poll_element);
 		static 			void	exit();
 
 	private:

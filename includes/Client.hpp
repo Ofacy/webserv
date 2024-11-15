@@ -48,6 +48,7 @@ private:
 	int					_updateRead(struct pollfd &pollfd, Configuration &config);
 	int					_updateWrite(struct pollfd &pollfd, Configuration &config);
 
+	void				_cleanResponse(Configuration &config);
 	State				_state;
 	Bind				&_bind;
 	int 				_fd;

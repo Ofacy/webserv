@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/13 17:46:08 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:02:47 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,9 +125,11 @@ void	HttpRequest::_parseRequestLine(std::string &line) {
 		this->_state = INVALID;
 		return ;
 	}
+	std::cout << "========== " << std::endl;
 	std::cout << "Method: " << this->_method << std::endl;
 	std::cout << "URI: " << this->_uri << std::endl;
 	std::cout << "Version: " << this->_version << std::endl;
+	std::cout << "========== " << std::endl;
 	this->_state = HEADERS;
 	if (this->_version != "HTTP/1.1") {
 		this->_state = INVALID;
@@ -161,7 +163,7 @@ void	HttpRequest::_parseHeaderLine(std::string &line) {
 	if (value_pos == std::string::npos)
 		value_pos = 0;
 	std::string value = line.substr(value_pos);
-	std::cout << "Header : " << key << ": " << value << std::endl;
+	//std::cout << "Header : " << key << ": " << value << std::endl;
 	this->setHeader(key, value);
 }
 

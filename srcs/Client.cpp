@@ -6,22 +6,22 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/13 18:17:59 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:02:55 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Configuration.hpp"
 #include "Bind.hpp"
 #include "Client.hpp"
 #include <unistd.h>
 #include <poll.h>
 #include <iostream>
-#include <arpa/inet.h>
 
 #include "StatusHttpResponse.hpp"
 
 Client::Client(Bind &bind, int fd, struct sockaddr_in addr) : _state(READ), _bind(bind), _fd(fd), _addr(addr), _response(NULL)
 {
-	std::cout << "Client " << inet_ntoa(addr.sin_addr) << " created" << std::endl;
+	std::cout << "Client " << fd << " created" << std::endl;
 }
 
 Client::Client(const Client &src) : _bind(src._bind), _response(NULL)
@@ -43,7 +43,8 @@ Client::~Client()
 {
 	std::cout << "Client " << this->_fd << " destroyed" << std::endl;
 	close(this->_fd);
-	delete this->_response;
+	if (this->_response && this->_response->getPollElement() == NULL)
+		delete this->_response;
 }
 
 int Client::getFd() const
@@ -67,19 +68,26 @@ short	Client::getEvents() const
 }
 
 int	Client::update(struct pollfd &pollfd, Configuration &config) {
-	(void)config;
 	if (pollfd.revents & POLLIN) {
-		return this->_updateRead(pollfd, config);
+		if (this->_updateRead(pollfd, config) <= 0)
+		{
+			this->_cleanResponse(config);
+			return (-1);
+		}
 	}
 	if (pollfd.revents & POLLOUT) {
-		return this->_updateWrite(pollfd, config);
+		if (this->_updateWrite(pollfd, config) <= 0)
+		{
+			this->_cleanResponse(config);
+			return (-1);
+		}
 		//std::cout << "Client " << this->_fd << " is ready to write" << std::endl;
 	}
-	else if (pollfd.revents == POLLHUP) {
+	if (pollfd.revents & POLLHUP || pollfd.revents & POLLERR) {
 		//std::cout << "Client " << this->_fd << " disconnected" << std::endl;
+		this->_cleanResponse(config);
 		return (-1);
 	}
-	std::cout << "Client " << this->_fd << " unknown event" << std::endl;
 	return (1);
 }
 
@@ -91,12 +99,14 @@ int	Client::_updateRead(struct pollfd &fd, Configuration &config) {
 	if (ret < 0)
 		return (-1);
 	this->_request.update(buffer, ret);
-	if (this->_request.isHeaderDone()) {
+	if (this->_request.isHeaderDone() && this->_response == NULL) {
 		// GET THE RESPONSE
 		this->_response = this->_bind.getResponse(this->_request, config);
-		//this->_response = new StatusHttpResponse(this->_request, 200);
+		if (this->_response->getPollElement() != NULL)
+			config.addPollElement(this->_response->getPollElement());
 		this->_state = this->_request.hasBody() ? READ_WRITE : WRITE;
 		fd.events = this->getEvents();
+		//this->_response = new StatusHttpResponse(this->_request, 200);
 	}
 	if (this->_request.isDone())
 		this->_state = WRITE;
@@ -106,5 +116,17 @@ int	Client::_updateRead(struct pollfd &fd, Configuration &config) {
 int Client::_updateWrite(struct pollfd &fd, Configuration &config) {
 	(void)config;
 	(void)fd;
-	return this->_response->writeResponse(this->_fd);
+	return (this->_response->writeResponse(this->_fd));
+}
+
+void Client::_cleanResponse(Configuration &config)
+{
+	if (this->_response)
+	{
+		if (this->_response->getPollElement() != NULL)
+			config.removePollElement(this->_response->getPollElement());
+		else
+			delete this->_response;
+		this->_response = NULL;
+	}
 }

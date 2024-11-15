@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 18:08:59 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:02:47 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ void	Configuration::addPollElement(IPollElement *poll_element) {
 	pollfd.fd = poll_element->getFd();
 	pollfd.events = poll_element->getEvents();
 	pollfd.revents = 0;
+	// std::cout << "Adding poll element with fd = " << pollfd.fd << std::endl;
 	this->_poll_elements.push_back(poll_element);
 	this->_pollfds.push_back(pollfd);
 }
@@ -111,13 +112,32 @@ void Configuration::_poll() {
 			if (this->_pollfds[i].revents == 0)
 				continue;
 			IPollElement *poll_element = this->_poll_elements[i];
-			if (poll_element->update(this->_pollfds[i], *this) <= 0)
+			struct pollfd pollfd = this->_pollfds[i];
+			if (poll_element->update(pollfd, *this) <= 0)
 			{
+				// std::cout << "Removing poll element with fd = " << poll_element->getFd() << std::endl;
+				// std::cout << "poll_elements size = " << this->_poll_elements.size() << std::endl;
 				this->_poll_elements.erase(this->_poll_elements.begin() + i);
 				delete poll_element;
 				this->_pollfds.erase(this->_pollfds.begin() + i);
 				i--;
 			}
+			else
+				this->_pollfds[i] = pollfd;
+		}
+	}
+}
+
+void	Configuration::removePollElement(IPollElement *poll_element)
+{
+	// std::cout << "Removing poll element with fd = " << poll_element->getFd() << std::endl;
+	// std::cout << "poll_elements size = " << this->_poll_elements.size() << std::endl;
+	for (size_t i = 0; i < this->_poll_elements.size(); i++) {
+		if (this->_poll_elements[i] == poll_element) {
+			this->_poll_elements.erase(this->_poll_elements.begin() + i);
+			this->_pollfds.erase(this->_pollfds.begin() + i);
+			delete poll_element;
+			break;
 		}
 	}
 }

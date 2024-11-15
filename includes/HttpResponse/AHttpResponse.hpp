@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 16:38:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/13 17:08:20 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:10:03 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ protected:
 
 	void			createHeaderBuffer(uint16_t code, std::map<std::string, std::string> &headers);
 	std::string		getReasonPhrase(uint16_t code) const;
+	void			appendBody(char *data, size_t size);
 private:
 	HttpRequest		&_request;
 	std::string		_write_buffer;

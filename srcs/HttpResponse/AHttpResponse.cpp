@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/13 17:20:57 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 17:02:47 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ int AHttpResponse::writeResponse(int fd) {
 	if (ret == -1) {
 		return (-1);
 	}
-	std::cout << "Sent " << ret << " bytes" << std::endl;
+	//std::cout << "Sent " << ret << " bytes" << std::endl;
 	this->_write_buffer.erase(0, ret);
 	return ((this->isBufferDone() && this->_write_buffer.empty()) ? 0 : 1);
 }
@@ -82,6 +82,7 @@ void	AHttpResponse::createHeaderBuffer(uint16_t code, std::map<std::string, std:
 	header += "\r\n";
 	this->_write_buffer = header;
 	this->_header_ready = true;
+	// std::cout << "Responding with: " << code << " " << this->getReasonPhrase(code) << std::endl;
 }
 
 std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
@@ -117,4 +118,9 @@ std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
 			return "";
 			break;
 	}
+}
+
+void AHttpResponse::appendBody(char * data, size_t size)
+{
+	this->_write_buffer.append(data, size);
 }

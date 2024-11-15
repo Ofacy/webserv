@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/13 18:26:47 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:32:48 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <algorithm>
 #include "StatusHttpResponse.hpp"
+#include "FileHttpResponse.hpp"
 #include "InheritedParameters.hpp"
 
 InheritedParameters::InheritedParameters(void) {
@@ -145,7 +146,7 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 		int fd = open(path.c_str(), O_RDONLY);
 		if (fd == -1)
 			return (this->getErrorResponse(request, 404, root));
-		return (new FileHttpResponse(200, fd, buffer));
+		return (new FileHttpResponse(request, 200, fd, buffer));
 	}
 	return (NULL);
 }
@@ -159,4 +160,9 @@ AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const
 AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const uint16_t status_code) const
 {
 	return InheritedParameters::getErrorResponse(request, status_code, "");
+}
+
+AHttpResponse *InheritedParameters::_getDirectoryResponse(HttpRequest &request, const std::string &path) const {
+	(void)path;
+	return (new StatusHttpResponse(request, 501));
 }

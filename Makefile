@@ -6,7 +6,7 @@
 #    By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/11/13 18:28:27 by bwisniew         ###   ########.fr        #
+#    Updated: 2024/11/15 17:02:47 by bwisniew         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -MMD -MP -g3
 SRCS_DIR = srcs
 
 SRCS =	main.cpp Configuration.cpp Server.cpp Location.cpp Bind.cpp Client.cpp signal.cpp HttpRequest.cpp \
-		HttpMessage.cpp InheritedParameters.cpp
+		HttpMessage.cpp InheritedParameters.cpp 
 
 
 CONFIG_SRCS = Parser.cpp
