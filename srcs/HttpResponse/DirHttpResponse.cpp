@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:52:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/15 19:18:54 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 22:47:57 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <iostream>
 
 DirHttpResponse::DirHttpResponse(const DirHttpResponse &src) : AHttpResponse(src) {
 	*this = src;
 }
 
 DirHttpResponse::DirHttpResponse(HttpRequest &request, uint16_t status, const std::string &path) : AHttpResponse(request) {
-	std::stringstream ss;
+	std::string body(HTML_DIR_BEGIN);
 	std::map<std::string, std::string> headers;
 	DIR *dir;
 	
@@ -30,17 +31,20 @@ DirHttpResponse::DirHttpResponse(HttpRequest &request, uint16_t status, const st
 	if (dir == NULL) {
 		throw std::runtime_error("Error: could not open directory");
 	}
-	ss << HTML_DIR_BEGIN;
+	
+	body.replace(body.find("#title#"), 7, "/" + path.substr(path.find_last_of("/") + 1));
+	body.replace(body.find("#path#"), 6, "/" + path.substr(path.find_last_of("/") + 1));
+
+	std::stringstream ss;
 	while (struct dirent *entry = readdir(dir)) {
 		if (std::string(entry->d_name) == ".") {
 			continue;
 		}
 		ss << this->_buildDirectoryElement(entry->d_name, path);
 	}
-	ss << HTML_DIR_END;
+	body.replace(body.find("#table#"), 7, ss.str());
 	this->createHeaderBuffer(status, headers);
-	std::string str = ss.str();
-	this->appendBody(str);
+	this->appendBody(body);
 	closedir(dir);
 	this->setBufferDone(true);
 }
@@ -59,11 +63,26 @@ std::string DirHttpResponse::_buildDirectoryElement(const std::string &file, con
 		throw std::runtime_error("Error: could not get file stats");
 	}
 	std::stringstream ss;
+	
+	S_ISDIR(statbuf.st_mode) ? this->_buildDirRow(ss, file) : this->_buildFileRow(ss, file, statbuf.st_size);
+	return ss.str();
+}
+
+void DirHttpResponse::_buildFileRow(std::stringstream &ss, const std::string &file, const long size)
+{
+	ss << "<tr><td><span class='icon'>📄</span><a href='" << _getUriPath(file) << "'>" << file << "</a></td><td>" << (size / 1024) << "KB</td></tr>";
+}
+void DirHttpResponse::_buildDirRow(std::stringstream &ss, const std::string &file)
+{
+	ss << "<tr><td class='folder' ><span class='icon'>📁</span><a href='" << _getUriPath(file) << "'>" << file << "</a></td><td>—</td></tr>";
+}
+
+std::string DirHttpResponse::_getUriPath(const std::string &file)
+{
 	std::string uripath = this->getRequest().getUri();
 	if (uripath[uripath.size() - 1] != '/') {
 		uripath += "/";
 	}
 	uripath += file;
-	ss << "<tr><td><a href=\"" << uripath << "\">" << file << "</a></td><td>" << statbuf.st_size << "</td></tr></br>";
-	return ss.str();
+	return uripath;
 }
