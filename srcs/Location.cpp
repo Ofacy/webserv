@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 16:25:45 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/15 17:30:23 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 14:48:05 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 Location::Location(void) {}
 
-Location::Location(const Location &src) {
+Location::Location(const Location &src) : InheritedParameters(src) {
 	*this = src;
 }
 

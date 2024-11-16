@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:20:50 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/15 17:30:40 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 14:47:58 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 Server::Server(void) {}
 
-Server::Server(const Server &src) {
+Server::Server(const Server &src) : InheritedParameters(src) {
 	*this = src;
 }
 

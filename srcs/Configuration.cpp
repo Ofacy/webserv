@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/15 17:30:49 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 14:47:51 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ bool Configuration::_exit = false;
 
 Configuration::Configuration(void) {};
 
-Configuration::Configuration(const Configuration &src) {
+Configuration::Configuration(const Configuration &src) : InheritedParameters(src) {
 	*this = src;
 }
 
