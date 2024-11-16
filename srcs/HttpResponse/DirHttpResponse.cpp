@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:52:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 22:47:57 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 22:55:07 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ DirHttpResponse::DirHttpResponse(const DirHttpResponse &src) : AHttpResponse(src
 }
 
 DirHttpResponse::DirHttpResponse(HttpRequest &request, uint16_t status, const std::string &path) : AHttpResponse(request) {
-	std::string body(HTML_DIR_BEGIN);
+	std::string body(HTML_DIR);
 	std::map<std::string, std::string> headers;
 	DIR *dir;
 	
@@ -32,8 +32,8 @@ DirHttpResponse::DirHttpResponse(HttpRequest &request, uint16_t status, const st
 		throw std::runtime_error("Error: could not open directory");
 	}
 	
-	body.replace(body.find("#title#"), 7, "/" + path.substr(path.find_last_of("/") + 1));
-	body.replace(body.find("#path#"), 6, "/" + path.substr(path.find_last_of("/") + 1));
+	body.replace(body.find("#title#"), 7, request.getUri());
+	body.replace(body.find("#path#"), 6, request.getUri());
 
 	std::stringstream ss;
 	while (struct dirent *entry = readdir(dir)) {

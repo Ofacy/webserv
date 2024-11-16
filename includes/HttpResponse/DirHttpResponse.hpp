@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:45:42 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 22:30:19 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 22:55:05 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <stdint.h>
 # include <sstream>
 
-# define HTML_DIR_BEGIN "<!DOCTYPE html>\n\
+# define HTML_DIR "<!DOCTYPE html>\n\
 <html lang=\"fr\">\n\
 <head>\n\
     <meta charset=\"UTF-8\">\n\
