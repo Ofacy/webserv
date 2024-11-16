@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+         #
+#    By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/11/15 19:08:25 by bwisniew         ###   ########.fr        #
+#    Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ SRCS += $(CONFIG_SRCS:%.cpp=config/%.cpp)
 PARSING_SRCS =	Attribute.cpp Lexer.cpp Token.cpp AAttributeParser.cpp
 SRCS += $(PARSING_SRCS:%.cpp=config/parsing/%.cpp) 
 
-HTTPRESPONSE_SRCS = AHttpResponse.cpp StatusHttpResponse.cpp FileHttpResponse.cpp DirHttpResponse.cpp
+HTTPRESPONSE_SRCS = AHttpResponse.cpp StatusHttpResponse.cpp FileHttpResponse.cpp DirHttpResponse.cpp CGIHttpResponse.cpp
 SRCS += $(HTTPRESPONSE_SRCS:%.cpp=HttpResponse/%.cpp)
 
 

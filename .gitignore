@@ -7,3 +7,7 @@ config.json
 *.o
 *.d
 *.out
+.cache
+env_cgi
+valgrind.log
+rockyou.txt

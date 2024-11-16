@@ -15,20 +15,20 @@ server {
 }
 server {
 	server_name;
-	listen		127.0.0.0 8083;
+	listen		0.0.0.0 8083;
 	location / {
 		error_page  404 403 402 /404.html;
 		client_max_body_size 100m;
-		cgi .php .htm .html ./ubuntu_cgi_tester;
+		cgi .php .htm .html /usr/bin/php-cgi;
 		limit_except GET POST DELETE; 
-		root /var/www/;
+		root ./static;
 		autoindex on;
 		index index.html index.php;
 	}
 }
 server {
 	server_name hello;
-	listen 127.0.0.1 8082;
+	listen 0.0.0.0 8082;
 	location / {
 		root /;
 	}

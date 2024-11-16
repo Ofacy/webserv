@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:35:52 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 16:42:42 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ class HttpRequest : public HttpMessage {
 		HttpRequestState	_state;
 		std::string			_buffer;
 		std::string			_body_buffer;
+		size_t				_current_body_size;
+		size_t				_content_length;
 		std::string			_method;
 		std::string			_uri;
 		std::string			_version;

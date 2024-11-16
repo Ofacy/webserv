@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 14:47:51 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/16 17:24:10 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void	Configuration::addPollElement(IPollElement *poll_element) {
 	pollfd.fd = poll_element->getFd();
 	pollfd.events = poll_element->getEvents();
 	pollfd.revents = 0;
-	// std::cout << "Adding poll element with fd = " << pollfd.fd << std::endl;
+	//std::cout << "Adding poll element with fd = " << pollfd.fd << std::endl;
 	this->_poll_elements.push_back(poll_element);
 	this->_pollfds.push_back(pollfd);
 }
@@ -100,8 +100,8 @@ Bind	&Configuration::_getBind(const Server &server) {
 }
 
 void Configuration::_poll() {
-	std::cout << "Poll elements: " << this->_poll_elements.size() << std::endl;
-	std::cout << "Poll fds: " << this->_pollfds.size() << std::endl;
+	// std::cout << "Poll elements: " << this->_poll_elements.size() << std::endl;
+	// std::cout << "Poll fds: " << this->_pollfds.size() << std::endl;
 	while (!Configuration::_exit) {
 		if (::poll(&this->_pollfds[0], this->_pollfds.size(), -1) == -1)
 		{
@@ -131,8 +131,8 @@ void Configuration::_poll() {
 
 void	Configuration::removePollElement(IPollElement *poll_element)
 {
-	// std::cout << "Removing poll element with fd = " << poll_element->getFd() << std::endl;
-	// std::cout << "poll_elements size = " << this->_poll_elements.size() << std::endl;
+	//std::cout << "Removing poll element with fd = " << poll_element->getFd() << std::endl;
+	//std::cout << "poll_elements size = " << this->_poll_elements.size() << std::endl;
 	for (size_t i = 0; i < this->_poll_elements.size(); i++) {
 		if (this->_poll_elements[i] == poll_element) {
 			this->_poll_elements.erase(this->_poll_elements.begin() + i);

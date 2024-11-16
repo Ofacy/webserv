@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 19:02:54 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 17:21:21 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 Client::Client(Bind &bind, int fd, struct sockaddr_in addr) : _state(READ), _bind(bind), _fd(fd), _addr(addr), _response(NULL)
 {
-	std::cout << "Client " << fd << " created" << std::endl;
+	//std::cout << "Client " << fd << " created" << std::endl;
 }
 
 Client::Client(const Client &src) : _bind(src._bind), _response(NULL)
@@ -41,7 +41,7 @@ Client &Client::operator=(const Client &rhs)
 
 Client::~Client()
 {
-	std::cout << "Client " << this->_fd << " destroyed" << std::endl;
+	//std::cout << "Client " << this->_fd << " destroyed" << std::endl;
 	close(this->_fd);
 	if (this->_response && this->_response->getPollElement() == NULL)
 		delete this->_response;

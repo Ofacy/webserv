@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   InheritedParameters.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 19:15:42 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "StatusHttpResponse.hpp"
 #include "FileHttpResponse.hpp"
 #include "DirHttpResponse.hpp"
+#include "CGIHttpResponse.hpp"
 #include "InheritedParameters.hpp"
 
 InheritedParameters::InheritedParameters(void) {
@@ -145,6 +146,15 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 		return (this->_getDirectoryResponse(request, path, root));
 	}
 	else {
+		std::map<std::string, std::string>::const_iterator it = this->_cgi_paths.begin();
+		for (; it != this->_cgi_paths.end(); it++) {
+			if (uri.size() > it->first.size() && uri.find(it->first, uri.size() - it->first.size()) != std::string::npos)
+				break ;
+		}
+		if (it != this->_cgi_paths.end()) {
+			std::cout << "Found CGI path " << it->second << std::endl;
+			return (new CGIHttpResponse(request, root + uri, it->second));
+		}
 		int fd = open(path.c_str(), O_RDONLY);
 		if (fd == -1)
 			return (this->getErrorResponse(request, 404, root));
@@ -161,7 +171,7 @@ AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const
 	struct stat buffer;
 	std::string path = root + it->second;
 
-	std::cout << "Error page path: " << path << std::endl;
+	//std::cout << "Error page path: " << path << std::endl;
 	if (stat(path.c_str(), &buffer) == -1)
 		return (new StatusHttpResponse(request, status_code));
 	if (S_ISDIR(buffer.st_mode))

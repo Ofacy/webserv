@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpMessage.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:32:46 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 17:11:55 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include <map>
 # include <string>
+
+#define HTTP_VERSION "HTTP/1.1"
 
 
 class HttpMessage {

@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 19:02:54 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpRequest.hpp"
 #include <iostream>
+#include <cstdlib>
 
 HttpRequest::HttpRequest() : HttpMessage(), _state(REQUEST_LINE) {}
 
@@ -59,6 +60,15 @@ void	HttpRequest::update(char *buffer, size_t size) {
 		this->_state = DONE;
 		return;
 	}
+	if (this->_state == BODY)
+	{
+		this->_body_buffer.append(buffer, size);
+		this->_current_body_size += size;
+		std::cout << "Body size: " << this->_current_body_size << std::endl;
+		if (this->_current_body_size >= this->_content_length)
+			this->_state = DONE;
+		return ;
+	}
 	this->_buffer.append(buffer, size);
 	std::string line;
 	size_t pos;
@@ -66,6 +76,14 @@ void	HttpRequest::update(char *buffer, size_t size) {
 		line = this->_buffer.substr(0, pos);
 		this->_parseLine(line);
 		this->_buffer.erase(0, pos + 2);
+		if (this->_state == BODY)
+		{
+			this->_content_length = std::strtoul(this->getHeader("Content-Length").c_str(), NULL, 10);
+			this->_body_buffer.append(this->_buffer);
+			if (this->_body_buffer.size() >= this->_content_length)
+				this->_state = DONE;
+			return ;
+		}
 	}
 	return;
 }
@@ -85,15 +103,6 @@ void	HttpRequest::_parseLine(std::string &line) {
 			return ;
 		}
 		this->_parseHeaderLine(line);
-	}
-	else if (this->_state == BODY)
-	{
-		if (line.empty())
-		{
-			this->_state = DONE;
-			return ;
-		}
-		this->_body_buffer.append(line); // TODO: handle chunked encoding
 	}
 }
 
