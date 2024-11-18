@@ -7,3 +7,9 @@ config.json
 *.o
 *.d
 *.out
+.cache
+env_cgi
+upper_cgi
+valgrind.log
+rockyou.txt
+en.subject.pdf

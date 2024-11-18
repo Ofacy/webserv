@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AAttributeParser.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:13:04 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 18:09:36 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/13 17:58:23 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,12 @@ class AAttributeParser {
 	protected:
 		AAttributeParser(void);
 		AAttributeParser(const AAttributeParser &src);
+		AAttributeParser &operator=(const AAttributeParser &rhs);
 
 		virtual ~AAttributeParser(void);
 
 		void			parse(const Attribute &root, std::vector<std::string> mandatory_childs);
-		virtual void	parseAttribute(const Attribute &child) = 0;
+		virtual bool	parseAttribute(const Attribute &child) = 0;
 		void			assertNotAlreadyDefined(const std::string &name) const;
 
 		class AlreadyDefinedException : public std::runtime_error {

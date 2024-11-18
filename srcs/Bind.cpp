@@ -3,13 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Bind.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:19 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 18:49:45 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/15 19:02:54 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Configuration.hpp"
+#include "StatusHttpResponse.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -17,6 +19,7 @@
 #include <cstring>
 #include <cerrno>
 #include <cstdlib>
+#include <fcntl.h>
 #include "Bind.hpp"
 
 Bind::Bind(void) : _port(0), _host(""), _fd(-1) {}
@@ -28,8 +31,12 @@ Bind::Bind(const Bind &src) {
 Bind::Bind(const std::string &host, int port) : _port(port), _host(host), _fd(-1) {
 	struct sockaddr_in addr;
 	this->_fd = socket(AF_INET, SOCK_STREAM, 0);
+	// std::cout << "bind fd: " << this->_fd << std::endl;
 	if (this->_fd == -1)
 		throw std::runtime_error("Failed to create socket: " + std::string(std::strerror(errno)));
+	int opt = 1;
+	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) == -1)
+		throw std::runtime_error("Failed to set socket options: " + std::string(std::strerror(errno)));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = _getHost();
@@ -60,6 +67,20 @@ int Bind::getPort(void) const {
 }
 
 void Bind::listen(void) {
+	if (::listen(this->_fd, SOMAXCONN) == -1)
+		throw std::runtime_error("Failed to listen on socket: " + std::string(std::strerror(errno)));
+	std::cout << "Listening on " << this->_host << ":" << this->_port << std::endl;
+}
+
+Client *Bind::accept(void) {
+	struct sockaddr_in addr;
+	socklen_t addr_len = sizeof(addr);
+	int fd = ::accept(this->_fd, (struct sockaddr *)&addr, &addr_len);
+	if (fd == -1)
+		throw std::runtime_error("Failed to accept connection: " + std::string(std::strerror(errno)));
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Failed to set socket to non-blocking: " + std::string(std::strerror(errno)));
+	return (new Client(*this, fd, addr));
 }
 
 void Bind::push_server(const Server &server) {
@@ -86,6 +107,38 @@ uint32_t Bind::_getHost(void) const {
 			count++;
 		}
 	}
-	std::cout << "host: " << htonl(host) << std::endl;
+	// std::cout << "host: " << htonl(host) << std::endl;
 	return (htonl(host));
+}
+
+
+int	Bind::getFd() const {
+	return (this->_fd);
+}
+
+short Bind::getEvents() const {
+	return (POLLIN);
+}
+
+int	Bind::update(struct pollfd &pollfd, Configuration &config) {
+	if ((pollfd.revents & POLLHUP) == POLLHUP)
+	{
+		// std::cout << "Bind update " << pollfd.revents << std::endl;
+		this->listen();
+	}
+	if ((pollfd.revents & POLLIN) == POLLIN) {
+		Client *client = this->accept();
+		config.addPollElement(client);
+	}
+	return (1);
+}
+
+AHttpResponse *Bind::getResponse(HttpRequest & request, Configuration &config)
+{
+	for (std::vector<Server>::reverse_iterator it = this->_servers.rbegin(); it != this->_servers.rend(); it++)
+	{
+		if (it->hasName(request.getHeader("Host")))
+			return (it->getResponse(request));
+	}
+	return (config.getErrorResponse(request, 404));
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Bind.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:38 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/10 18:11:32 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/13 18:22:03 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,14 @@
 # define BIND_HPP
 
 # include "Server.hpp"
+# include "Client.hpp"
 # include <stdint.h>
 # include <string>
 
-class Bind {
+class Client;
+class Configuration;
+
+class Bind : public IPollElement {
 	public:
 		Bind(void);
 		Bind(const Bind &src);
@@ -31,6 +35,12 @@ class Bind {
 		int					getPort(void) const;
 
 		void				listen(void);
+		Client				*accept(void);
+		
+		int					getFd(void) const;
+		short				getEvents(void) const;
+		int					update(struct pollfd &pollfd, Configuration &config);
+		AHttpResponse		*getResponse(HttpRequest &request, Configuration &config);
 
 		void				push_server(const Server &server);
 	private:

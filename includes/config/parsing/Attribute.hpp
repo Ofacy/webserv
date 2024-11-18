@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Attribute.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 12:18:42 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/15 18:11:12 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/13 17:44:16 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ class Attribute {
 
 		const std::vector<Attribute>							&getChildren(void) const;
 
+		void													pushChild(const Attribute &child);
+
 		void													assertNoChild() const;
 	private:
 		std::string					_name;
@@ -43,19 +45,5 @@ class Attribute {
 };
 
 std::ostream &operator<<(std::ostream &o, const Attribute &attr);
-
-/*
-server {
-	host ofacy.com;
-	location / {
-		satisfy any;
-
-		allow 192.168.1.0/32;
-		deny  all;
-	}
-	server_name	www.example.com;
-}
-
-*/
 
 #endif

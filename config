@@ -1,27 +1,35 @@
 server {
-	server_name	localhost;
-	listen		80;
-	error_page	 404 /404.html;
-	client_max_body_size	10m;
+	limit_except GET PUT;
+	server_name	;
+	listen		0.0.0.0 8080;
+	client_max_body_size	5000;
+	location / {
+		root .;
+		index main.cpp Client.hpp Makefile;
+		error_page	404 /static/error/404.html;
+		client_max_body_size	2000;
+	}
+	location /proute {
+		root ./includes;
+	}
 }
 server {
-	server_name	salut.com;
-	listen		80;
-	error_page  404 403 402 /404.html;
-	client_max_body_size 100m;
+	server_name;
+	listen		0.0.0.0 8083;
 	location / {
-		cgi .php .htm .html /usr/bin/php-cgi;
-		cgi .htmx /usr/bin/htmx-cgi;
-		limit_except GET POST PUT; 
-		root /var/www/;
-		autoindex on; // enable directory listing
-		index index.html index.php; // if this is not specified or the file doesnt exist, it will show the directory listing (if enabled otherwise 404)
-		
+		error_page  404 403 402 /404.html;
+		client_max_body_size 100;
+		cgi .php .htm .html ubuntu_cgi_tester;
+		limit_except GET POST DELETE; 
+		root ./static;
+		autoindex on;
+		index index.html index.php;
 	}
-	location /thing/ {
-		
-	}
-	location /index.html {
-		
+}
+server {
+	server_name hello;
+	listen 0.0.0.0 8082;
+	location / {
+		root /;
 	}
 }
