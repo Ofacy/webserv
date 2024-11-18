@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AHttpResponse.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 19:02:54 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/18 18:05:10 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,16 +73,17 @@ bool AHttpResponse::isHeaderReady() const
 	return _header_ready;
 }
 
-void	AHttpResponse::createHeaderBuffer(uint16_t code, std::map<std::string, std::string> &headers){
+void	AHttpResponse::createHeaderBuffer(uint16_t code, const std::map<std::string, std::string> &headers){
 	std::stringstream ss;
 	ss << "HTTP/1.1 " << code << " " << this->getReasonPhrase(code) << "\r\n";
 	std::string header = ss.str();
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); it++)
 		header += it->first + ": " + it->second + "\r\n";
 	header += "\r\n";
 	this->_write_buffer = header;
 	this->_header_ready = true;
-	// std::cout << "Responding with: " << code << " " << this->getReasonPhrase(code) << std::endl;
+
+	std::cout << "Responding with: " << code << " " << this->getReasonPhrase(code) << std::endl;
 }
 
 std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
@@ -105,6 +106,9 @@ std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
 		case 406:
 			return "Not Acceptable";
 			break;
+		case 411:
+			return "Length Required";
+			break;
 		case 413:
 			return "Payload Too Large";
 			break;
@@ -115,7 +119,7 @@ std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
 			return "Not Implemented";
 			break;
 		default:
-			return "";
+			return "Unknown Error";
 			break;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/16 14:52:00 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,19 +19,13 @@
 # include "AHttpResponse.hpp"
 # include "IPollElement.hpp"
 
-# define PIPE_READ 0
-# define PIPE_WRITE 1
+# define SOCKET_PARENT 0
+# define SOCKET_CHILD 1
 
-# define CGI_READ_BUFFER_SIZE 4096
+# define CGI_READ_BUFFER_SIZE 65536
 
 class CGIHttpResponse : public AHttpResponse, public IPollElement {
 public:
-	enum State {
-		WRITE,
-		READ,
-		DONE,
-		INVALID
-	};
 
 	CGIHttpResponse(HttpRequest &request, const std::string &script_path, const std::string &cgi_path);
 	CGIHttpResponse(const CGIHttpResponse &src);
@@ -44,20 +38,19 @@ public:
 	short			getEvents() const;
 	int				update(struct pollfd &pollfd, Configuration &config);
 private:
-	int							_readCGI();
+	int							_readCGI(struct pollfd &pollfd);
 	int							_writeCGI(struct pollfd &pollfd);
 	void						_finishHeader();
 	void						_forkCGI(const std::string &script_path, const std::string &cgi_path);
 	std::vector<std::string>	_generateForkEnv(const std::string &script_path);
-	void						_parseHeaderLine(std::string &line);
+	void						_parseHeaderLine(struct pollfd &pollfd, std::string &line);
 	int							_waitFork();
+	void						_finish(struct pollfd &pollfd);
 
 	std::map<std::string, std::string>	_cgi_headers;
 	std::string							_read_buffer;
-	State								_state;
 	int									_pid;
-	int									_stdin[2];
-	int									_stdout[2];
+	int									_fd;
 };
 
 #endif

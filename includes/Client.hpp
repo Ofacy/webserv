@@ -23,7 +23,7 @@ class IPollElement;
 class Configuration;
 class Bind;
 
-# define CLIENT_RECV_SIZE 4096
+# define CLIENT_RECV_SIZE 65536
 
 class Client : public IPollElement
 {

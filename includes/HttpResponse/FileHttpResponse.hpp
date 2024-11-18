@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   FileHttpResponse.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 18:27:55 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 16:32:39 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include "AHttpResponse.hpp"
 # include "IPollElement.hpp"
 
-#define FILE_BUFFER_SIZE 4096
+#define FILE_BUFFER_SIZE 65536
 
 class FileHttpResponse : public AHttpResponse, public IPollElement
 {

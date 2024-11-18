@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AHttpResponse.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 16:38:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 18:58:29 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ protected:
 	bool			isBufferDone() const;
 	bool			isHeaderReady() const;
 
-	void			createHeaderBuffer(uint16_t code, std::map<std::string, std::string> &headers);
+	void			createHeaderBuffer(uint16_t code, const std::map<std::string, std::string> &headers);
 	std::string		getReasonPhrase(uint16_t code) const;
 	void			appendBody(char *data, size_t size);
 	void			appendBody(const std::string &data);

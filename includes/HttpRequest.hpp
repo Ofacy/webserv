@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:35:52 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class HttpRequest : public HttpMessage {
 		const std::string	&getMethod(void) const;
 		const std::string	&getUri(void) const;
 		const std::string	&getVersion(void) const;
+		size_t				getContentLength(void) const;
 
 		HttpRequestState	getState(void) const;
 		bool				isDone(void) const;

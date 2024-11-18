@@ -1,17 +1,21 @@
+
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   CGIHttpResponse.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/16 14:54:22 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 17:24:07 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/18 15:45:18 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGIHttpResponse.hpp"
+#include <fcntl.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <cstring>
 #include <stdlib.h>
@@ -19,7 +23,9 @@
 #include <iostream>
 #include "HttpMessage.hpp"
 
-CGIHttpResponse::CGIHttpResponse(HttpRequest &request, const std::string &path, const std::string &cgi_path) : AHttpResponse(request) {
+CGIHttpResponse::CGIHttpResponse(HttpRequest &request, const std::string &path, const std::string &cgi_path) : AHttpResponse(request), _fd(-1) {
+	if (access(cgi_path.c_str(), X_OK) == -1)
+		throw std::runtime_error("CGI script not found or not executable: " + cgi_path);
 	this->_forkCGI(path, cgi_path);
 }
 
@@ -28,14 +34,8 @@ CGIHttpResponse::CGIHttpResponse(const CGIHttpResponse &src) : AHttpResponse(src
 }
 
 CGIHttpResponse::~CGIHttpResponse(void) {
-	if (this->_stdin[PIPE_READ] != -1)
-		close(this->_stdin[PIPE_READ]);
-	if (this->_stdin[PIPE_WRITE] != -1)
-		close(this->_stdin[PIPE_WRITE]);
-	if (this->_stdout[PIPE_READ] != -1)
-		close(this->_stdout[PIPE_READ]);
-	if (this->_stdout[PIPE_WRITE] != -1)
-		close(this->_stdout[PIPE_WRITE]);
+	if(this->_fd != -1)
+		close(this->_fd);
 }
 
 CGIHttpResponse &CGIHttpResponse::operator=(const CGIHttpResponse &rhs) {
@@ -43,12 +43,8 @@ CGIHttpResponse &CGIHttpResponse::operator=(const CGIHttpResponse &rhs) {
 		return (*this);
 	AHttpResponse::operator=(rhs);
 	this->_cgi_headers = rhs._cgi_headers;
-	this->_state = rhs._state;
 	this->_pid = rhs._pid;
-	this->_stdin[PIPE_READ] = rhs._stdin[PIPE_READ];
-	this->_stdin[PIPE_WRITE] = rhs._stdin[PIPE_WRITE];
-	this->_stdout[PIPE_READ] = rhs._stdout[PIPE_READ];
-	this->_stdout[PIPE_WRITE] = rhs._stdout[PIPE_WRITE];
+	this->_fd = rhs._fd;
 	return *this;
 }
 
@@ -57,63 +53,30 @@ IPollElement	*CGIHttpResponse::getPollElement() {
 }
 
 int	CGIHttpResponse::getFd() const {
-	switch (this->_state)
-	{
-	case WRITE:
-		return this->_stdin[PIPE_WRITE];
-		break;
-	default:
-		return this->_stdout[PIPE_READ];
-		break;
-	}
+	return (this->_fd);
 }
 
 short	CGIHttpResponse::getEvents() const {
-	switch (this->_state)
-	{
-	case WRITE:
-		return POLLOUT;
-		break;
-	default:
-		return POLLIN;
-		break;
-	}
+	return (POLLOUT | POLLIN);
 }
 
 int	CGIHttpResponse::update(struct pollfd &pollfd, Configuration &config) {
 	(void)config;
-	if (this->_state == WRITE && pollfd.revents & POLLOUT)
-	{
-		if (this->_writeCGI(pollfd) <= 0)
-			return -1;
-	}
-	else if (this->_state == READ && pollfd.revents & POLLIN)
-	{
-		if (this->_readCGI() <= 0)
-			return -1;
-	}
+	if (pollfd.revents & POLLOUT)
+		this->_writeCGI(pollfd);
+	if (pollfd.revents & POLLIN)
+		this->_readCGI(pollfd);
 	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL))
-	{
-		//std::cout << "Error on fd " << pollfd.fd << std::endl;
-		this->_waitFork();
-		this->setBufferDone(true);
-		
-		return 1;
-	}
+		this->_finish(pollfd);
 	return 1;
 }
 
-int CGIHttpResponse::_readCGI() {
+int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 	char buffer[CGI_READ_BUFFER_SIZE];
-	int ret = read(this->_stdout[PIPE_READ], buffer, CGI_READ_BUFFER_SIZE);
-	if (ret == -1)
-		return -1;
-	if (ret == 0)
-	{
-		this->setBufferDone(true);
-		this->_waitFork();
-		return (0);
-	}
+	int ret = read(this->_fd, buffer, CGI_READ_BUFFER_SIZE);
+	if (ret <= -1)
+		return (-1);
+	std::cout << "Read from cgi: " << ret << " bytes" << std::endl;
 	if (!this->isHeaderReady())
 	{
 		this->_read_buffer.append(buffer, ret);
@@ -126,7 +89,7 @@ int CGIHttpResponse::_readCGI() {
 				this->_finishHeader();
 			}
 			else
-				this->_parseHeaderLine(line);
+				this->_parseHeaderLine(pollfd, line);
 			this->_read_buffer.erase(0, pos + 2);
 		}
 		if (this->isHeaderReady())
@@ -140,19 +103,15 @@ int CGIHttpResponse::_readCGI() {
 }
 
 int CGIHttpResponse::_writeCGI(struct pollfd &pollfd) {
-	int ret = write(this->_stdin[PIPE_WRITE], this->getRequest().getBodyBuffer().c_str(), this->getRequest().getBodyBuffer().size());
+	int ret = write(this->_fd, this->getRequest().getBodyBuffer().c_str(), this->getRequest().getBodyBuffer().size());
 	if (ret == -1)
 		return -1;
 	if (ret != 0)
-		std::cout << "Request body sent: " << this->getRequest().getBodyBuffer().substr(0, ret) << std::endl;
 	this->getRequest().getBodyBuffer().erase(0, ret);
-	if (this->getRequest().isDone())
+	if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty())
 	{
-		close(this->_stdin[PIPE_WRITE]);
-		this->_stdin[PIPE_WRITE] = -1;
-		this->_state = READ;
-		pollfd.events = this->getEvents();
-		pollfd.fd = this->getFd();
+		pollfd.events = POLLIN;
+		std::cout << "Request body sent to cgi" << std::endl;
 	}
 	return (1);
 }
@@ -162,50 +121,36 @@ void	CGIHttpResponse::_finishHeader() {
 }
 
 void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string &cgi_path) {
-	memset(this->_stdin, -1, sizeof(this->_stdin));
-	memset(this->_stdout, -1, sizeof(this->_stdout));
-	if (pipe(this->_stdin) == -1 || pipe(this->_stdout) == -1) {
-		throw std::runtime_error("Failed to create pipe: " + std::string(std::strerror(errno)));
-	}
+	int socket_pair[2];
+	if (socketpair(PF_LOCAL, SOCK_STREAM, 0, socket_pair) == -1)
+		throw std::runtime_error("Failed to create socket pair: " + std::string(std::strerror(errno)));
 	this->_pid = fork();
 	if (this->_pid == -1) {
 		throw std::runtime_error("Failed to fork: " + std::string(std::strerror(errno)));
 	}
 	else if (this->_pid == 0)
 	{
-		if (dup2(this->_stdin[PIPE_READ], STDIN_FILENO) == -1 || dup2(this->_stdout[PIPE_WRITE], STDOUT_FILENO) == -1)
+		close(socket_pair[SOCKET_PARENT]);
+		if (dup2(socket_pair[SOCKET_CHILD], STDIN_FILENO) == -1 || dup2(socket_pair[SOCKET_CHILD], STDOUT_FILENO) == -1)
 			exit(1);
-		close(this->_stdin[PIPE_READ]);
-		close(this->_stdin[PIPE_WRITE]);
-		close(this->_stdout[PIPE_READ]);
-		close(this->_stdout[PIPE_WRITE]);
+		close(socket_pair[SOCKET_CHILD]);
 		std::vector<std::string> env = this->_generateForkEnv(script_path);
 		std::vector<char *> env_c;
 		for (size_t i = 0; i < env.size(); i++)
 			env_c.push_back(const_cast<char *>(env[i].c_str()));
 		env_c.push_back(NULL);
-		// std::cerr << "env size: " << env_c.size() << std::endl;
-		// for (size_t i = 0; i < env_c.size() - 1; i++)
-		// 	std::cerr << "env[" << i << "] = " << env_c[i] << std::endl;
 		std::vector<char *> argv_c;
 		argv_c.push_back(const_cast<char *>(cgi_path.c_str()));
 		argv_c.push_back(const_cast<char *>(script_path.c_str()));
 		argv_c.push_back(NULL);
-		// for (size_t i = 0; i < argv_c.size() - 1; i++)
-		// 	std::cerr << "arg[" << i << "] = " << argv_c[i] << std::endl;
 		execve(cgi_path.c_str(), &(argv_c.front()), &(env_c.front()));
 		std::cerr << "Failed to execve: " << std::strerror(errno) << std::endl;
 		exit(1);
 	}
-	close(this->_stdin[PIPE_READ]);
-	close(this->_stdout[PIPE_WRITE]);
-	this->_state = WRITE;
-	if (!this->getRequest().hasBody())
-	{
-		this->_state = READ;
-		close(this->_stdin[PIPE_WRITE]);
-		this->_stdin[PIPE_WRITE] = -1;
-	}
+	close(socket_pair[SOCKET_CHILD]);
+	this->_fd = socket_pair[SOCKET_PARENT];
+	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Failed to set pipe to non-blocking: " + std::string(std::strerror(errno)));
 }
 
 std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &script_path) {
@@ -225,15 +170,15 @@ std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &sc
 	return env;
 }
 
-void	CGIHttpResponse::_parseHeaderLine(std::string &line) {
+void	CGIHttpResponse::_parseHeaderLine(struct pollfd &pollfd, std::string &line) {
 	size_t pos = line.find(':');
 	if (pos == std::string::npos) {
-		this->_state = INVALID;
+		this->_finish(pollfd);
 		return ;
 	}
 	std::string key = line.substr(0, pos);
 	if (key.find_first_not_of(" \t") == std::string::npos) {
-		this->_state = INVALID;
+		this->_finish(pollfd);
 		return ;
 	}
 	size_t value_pos = line.find_first_not_of(" \t", pos + 1);
@@ -248,5 +193,16 @@ int	CGIHttpResponse::_waitFork() {
 	int status;
 	waitpid(this->_pid, &status, 0);
 	std::cout << "Child exited with status " << WEXITSTATUS(status) << std::endl;
-	return WEXITSTATUS(status);
+	return status;
+}
+
+void	CGIHttpResponse::_finish(struct pollfd &pollfd) {
+	int status = this->_waitFork();
+	this->setBufferDone(true);
+	pollfd.events = 0;
+	if (status != 0)
+	{
+		if (!this->isHeaderReady())
+			this->createHeaderBuffer(500, std::map<std::string, std::string>());
+	}
 }

@@ -6,17 +6,18 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/18 19:56:40 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpRequest.hpp"
+#include <cerrno>
 #include <iostream>
 #include <cstdlib>
 
-HttpRequest::HttpRequest() : HttpMessage(), _state(REQUEST_LINE) {}
+HttpRequest::HttpRequest() : HttpMessage(), _state(REQUEST_LINE), _current_body_size(0), _content_length(0) {}
 
-HttpRequest::HttpRequest(const HttpRequest &src) : HttpMessage(src), _state(REQUEST_LINE) {
+HttpRequest::HttpRequest(const HttpRequest &src) : HttpMessage(src), _state(REQUEST_LINE), _current_body_size(0), _content_length(0) {
 	*this = src;
 }
 
@@ -42,6 +43,10 @@ const std::string	&HttpRequest::getUri(void) const {
 	return (this->_uri);
 }
 
+size_t	HttpRequest::getContentLength(void) const {
+	return (this->_content_length);
+}
+
 HttpRequest::HttpRequestState	HttpRequest::getState(void) const {
 	return (this->_state);
 }
@@ -55,18 +60,20 @@ bool	HttpRequest::isHeaderDone(void) const {
 }
 
 void	HttpRequest::update(char *buffer, size_t size) {
-	if (size == 0 && this->_state == BODY)
-	{
-		this->_state = DONE;
-		return;
-	}
 	if (this->_state == BODY)
 	{
+		if (this->_current_body_size + size > this->_content_length)
+		{
+			this->_state = INVALID;
+			return ;
+		}
 		this->_body_buffer.append(buffer, size);
 		this->_current_body_size += size;
-		std::cout << "Body size: " << this->_current_body_size << std::endl;
-		if (this->_current_body_size >= this->_content_length)
+		if (this->_current_body_size == this->_content_length)
+		{
 			this->_state = DONE;
+			std::cout << "Request body done" << std::endl;
+		}
 		return ;
 	}
 	this->_buffer.append(buffer, size);
@@ -78,10 +85,20 @@ void	HttpRequest::update(char *buffer, size_t size) {
 		this->_buffer.erase(0, pos + 2);
 		if (this->_state == BODY)
 		{
-			this->_content_length = std::strtoul(this->getHeader("Content-Length").c_str(), NULL, 10);
+			char *endptr;
+			this->_content_length = std::strtoul(this->getHeader("Content-Length").c_str(), &endptr, 10);
+			if (*endptr != '\0' || errno == ERANGE)
+			{
+				this->_state = INVALID;
+				return ;
+			}
 			this->_body_buffer.append(this->_buffer);
+			_current_body_size = this->_body_buffer.size();
 			if (this->_body_buffer.size() >= this->_content_length)
+			{
 				this->_state = DONE;
+				this->_body_buffer.substr(0, this->_content_length);
+			}
 			return ;
 		}
 	}
@@ -97,6 +114,7 @@ void	HttpRequest::_parseLine(std::string &line) {
 		this->_parseRequestLine(line);
 	else if (this->_state == HEADERS)
 	{
+		std::cout << "Header line: " << line << std::endl;
 		if (line.empty())
 		{
 			this->_state = this->hasBody() ? BODY : DONE;
@@ -115,6 +133,7 @@ void	HttpRequest::_parseLine(std::string &line) {
 // Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
 
 void	HttpRequest::_parseRequestLine(std::string &line) {
+	std::cout << "Request line: " << line << std::endl;
 	if (line.find("\r") != std::string::npos || line.find("\n") != std::string::npos) {
 		this->_state = INVALID;
 		return ;

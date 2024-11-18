@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/16 17:21:21 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/18 19:56:42 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 Client::Client(Bind &bind, int fd, struct sockaddr_in addr) : _state(READ), _bind(bind), _fd(fd), _addr(addr), _response(NULL)
 {
-	//std::cout << "Client " << fd << " created" << std::endl;
+	std::cout << "Client " << fd << " created" << std::endl;
 }
 
 Client::Client(const Client &src) : _bind(src._bind), _response(NULL)
@@ -41,7 +41,7 @@ Client &Client::operator=(const Client &rhs)
 
 Client::~Client()
 {
-	//std::cout << "Client " << this->_fd << " destroyed" << std::endl;
+	std::cout << "Client " << this->_fd << " destroyed" << std::endl;
 	close(this->_fd);
 	if (this->_response && this->_response->getPollElement() == NULL)
 		delete this->_response;
@@ -93,20 +93,25 @@ int	Client::update(struct pollfd &pollfd, Configuration &config) {
 
 int	Client::_updateRead(struct pollfd &fd, Configuration &config) {
 	char buffer[CLIENT_RECV_SIZE];
-	(void)config;
-	(void)fd;
 	int ret = recv(this->_fd, buffer, CLIENT_RECV_SIZE, 0);
 	if (ret < 0)
 		return (-1);
 	this->_request.update(buffer, ret);
 	if (this->_request.isHeaderDone() && this->_response == NULL) {
-		// GET THE RESPONSE
-		this->_response = this->_bind.getResponse(this->_request, config);
+		try {
+			if (this->_request.getState() == HttpRequest::INVALID)
+				this->_response = new StatusHttpResponse(this->_request, 400);
+			else
+				this->_response = this->_bind.getResponse(this->_request, config);
+		}
+		catch(std::exception &except)
+		{
+			this->_response = new StatusHttpResponse(this->_request, 500, except.what());
+		}
 		if (this->_response->getPollElement() != NULL)
 			config.addPollElement(this->_response->getPollElement());
 		this->_state = this->_request.hasBody() ? READ_WRITE : WRITE;
 		fd.events = this->getEvents();
-		//this->_response = new StatusHttpResponse(this->_request, 200);
 	}
 	if (this->_request.isDone())
 		this->_state = WRITE;

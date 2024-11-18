@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   StatusHttpResponse.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:43:52 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 16:53:32 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 class StatusHttpResponse : public AHttpResponse {
 public:
+	StatusHttpResponse(HttpRequest &request, uint16_t code, const std::string &body);
 	StatusHttpResponse(HttpRequest &request, uint16_t code);
 	StatusHttpResponse(StatusHttpResponse const & src);
 	~StatusHttpResponse(void);

@@ -3,19 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   FileHttpResponse.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 18:28:08 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/15 16:58:23 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "FileHttpResponse.hpp"
+#include <cstring>
+#include <cerrno>
+#include <fcntl.h>
 #include <unistd.h>
 #include <iostream>
 
 FileHttpResponse::FileHttpResponse(HttpRequest &request, uint16_t status, int fd, struct stat stats) : AHttpResponse(request), _fd(fd)
 {
+	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Failed to set file descriptor to non-blocking: " + std::string(std::strerror(errno)));
 	std::map<std::string, std::string> headers;
 	std::stringstream ss;
 	ss << stats.st_size;
