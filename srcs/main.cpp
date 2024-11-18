@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 10:46:31 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/12 16:01:44 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/18 16:21:38 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 void	setup_signal();
 
 int main(int argc, char **argv) {
-	std::string config_path = "config";
+	std::string config_path = "tester.conf";
 
 	if (argc > 2) {
 		std::cerr << argv[0] << " [configfile]" << std::endl;
