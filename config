@@ -1,13 +1,13 @@
 server {
-	limit_except GET;
+	limit_except GET PUT;
 	server_name	;
 	listen		0.0.0.0 8080;
-	client_max_body_size	5m;
+	client_max_body_size	5000;
 	location / {
 		root .;
 		index main.cpp Client.hpp Makefile;
 		error_page	404 /static/error/404.html;
-		client_max_body_size	2m;
+		client_max_body_size	2000;
 	}
 	location /proute {
 		root ./includes;
@@ -18,8 +18,8 @@ server {
 	listen		0.0.0.0 8083;
 	location / {
 		error_page  404 403 402 /404.html;
-		client_max_body_size 100m;
-		cgi .php .htm .html /usr/bin/php-cgi;
+		client_max_body_size 100;
+		cgi .php .htm .html ubuntu_cgi_tester;
 		limit_except GET POST DELETE; 
 		root ./static;
 		autoindex on;
