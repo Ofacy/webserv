@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:35:52 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/20 19:47:19 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,21 @@
 
 # include <sstream>
 # include "HttpMessage.hpp"
+
+class BodyParser;
+class Configuration;
+
 class HttpRequest : public HttpMessage {
 	public:
 		enum HttpRequestState {
 			REQUEST_LINE,
 			HEADERS,
+			PARSING_BODY,
 			BODY,
 			DONE,
 			INVALID
 		};
-		HttpRequest(void);
+		HttpRequest(Configuration &config);
 		HttpRequest(const HttpRequest &src);
 		~HttpRequest(void);
 
@@ -34,8 +39,12 @@ class HttpRequest : public HttpMessage {
 		const std::string	&getUri(void) const;
 		const std::string	&getVersion(void) const;
 		size_t				getContentLength(void) const;
+		void				setContentLength(size_t content_length);
+		size_t				getMaxBodySize(void) const;
+		void				setMaxBodySize(size_t max_body_size);
 
 		HttpRequestState	getState(void) const;
+		void				setState(HttpRequestState state);
 		bool				isDone(void) const;
 		bool				isHeaderDone(void) const;
 
@@ -45,11 +54,15 @@ class HttpRequest : public HttpMessage {
 	private:
 		void				_parseLine(std::string &line);
 		void				_parseRequestLine(std::string &line);
-		void				_parseHeaderLine(std::string &line);
+		void				_parseHeaderLine(std::string &line);\
+		BodyParser			*_selectBodyParser(void);
+
+		Configuration		&_config;
 		HttpRequestState	_state;
+		BodyParser			*_body_parser;
 		std::string			_buffer;
 		std::string			_body_buffer;
-		size_t				_current_body_size;
+		size_t				_max_body_size;
 		size_t				_content_length;
 		std::string			_method;
 		std::string			_uri;
