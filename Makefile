@@ -6,7 +6,7 @@
 #    By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/11/16 17:29:02 by lcottet          ###   ########lyon.fr    #
+#    Updated: 2024/11/19 01:31:32 by lcottet          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ SRCS += $(CONFIG_SRCS:%.cpp=config/%.cpp)
 PARSING_SRCS =	Attribute.cpp Lexer.cpp Token.cpp AAttributeParser.cpp
 SRCS += $(PARSING_SRCS:%.cpp=config/parsing/%.cpp) 
 
-HTTPRESPONSE_SRCS = AHttpResponse.cpp StatusHttpResponse.cpp FileHttpResponse.cpp DirHttpResponse.cpp CGIHttpResponse.cpp
+HTTPRESPONSE_SRCS = AHttpResponse.cpp StatusHttpResponse.cpp FileHttpResponse.cpp DirHttpResponse.cpp CGIHttpResponse.cpp UploadHttpResponse.cpp
 SRCS += $(HTTPRESPONSE_SRCS:%.cpp=HttpResponse/%.cpp)
 
 
