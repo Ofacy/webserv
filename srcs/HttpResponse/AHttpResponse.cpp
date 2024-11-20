@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AHttpResponse.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/18 18:05:10 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/20 19:43:10 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

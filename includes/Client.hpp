@@ -35,7 +35,7 @@ public:
 		READ_WRITE,
 		END
 	};
-	Client(Bind &bind, int fd, struct sockaddr_in addr);
+	Client(Bind &bind, int fd, struct sockaddr_in addr, Configuration &config);
 	Client(const Client &src);
 	Client &operator=(const Client &rhs);
 	~Client();
@@ -49,6 +49,7 @@ private:
 	int					_updateWrite(struct pollfd &pollfd, Configuration &config);
 
 	void				_cleanResponse(Configuration &config);
+	Configuration		&_config;
 	State				_state;
 	Bind				&_bind;
 	int 				_fd;

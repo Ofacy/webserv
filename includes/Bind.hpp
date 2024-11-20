@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:38 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 18:22:03 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/20 19:50:48 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class Bind : public IPollElement {
 		int					getPort(void) const;
 
 		void				listen(void);
-		Client				*accept(void);
+		Client				*accept(Configuration &config);
 		
 		int					getFd(void) const;
 		short				getEvents(void) const;

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+         #
+#    By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/11/19 01:31:32 by lcottet          ###   ########lyon.fr    #
+#    Updated: 2024/11/20 19:13:08 by bwisniew         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,8 +29,11 @@ SRCS += $(PARSING_SRCS:%.cpp=config/parsing/%.cpp)
 HTTPRESPONSE_SRCS = AHttpResponse.cpp StatusHttpResponse.cpp FileHttpResponse.cpp DirHttpResponse.cpp CGIHttpResponse.cpp UploadHttpResponse.cpp
 SRCS += $(HTTPRESPONSE_SRCS:%.cpp=HttpResponse/%.cpp)
 
+BODYPARSER_SRCS = BodyParser.cpp ChunkedBodyParser.cpp
+SRCS += $(BODYPARSER_SRCS:%.cpp=BodyParser/%.cpp)
 
-INCLUDE = includes includes/config includes/config/parsing includes/config/parsing/Token includes/HttpResponse
+
+INCLUDE = includes includes/config includes/config/parsing includes/config/parsing/Token includes/HttpResponse includes/BodyParser
 
 OUTDIR = obj
 
@@ -59,7 +62,7 @@ fclean: clean
 re: fclean $(NAME)
 
 valgrind: $(NAME)
-	valgrind --exit-on-first-error=yes --error-exitcode=42 --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --log-file=valgrind.log ./$(NAME)
+	valgrind --exit-on-first-error=yes --error-exitcode=42 --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --log-file=valgrind.log ./$(NAME) tester.conf
 
 -include $(DEP)
 

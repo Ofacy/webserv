@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   InheritedParameters.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/18 20:35:42 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/20 16:14:01 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,7 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 		return (this->getErrorResponse(request, 405, root));
 	if (request.getContentLength() > this->_max_body_size && this->_max_body_size != 0)
 		return (this->getErrorResponse(request, 413, root));
+	request.setMaxBodySize(this->_max_body_size);
 	std::string path = root + uri;
 	if (request.getMethod() == "PUT")
 	{

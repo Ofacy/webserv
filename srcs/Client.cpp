@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/18 19:56:42 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/20 19:52:31 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@
 
 #include "StatusHttpResponse.hpp"
 
-Client::Client(Bind &bind, int fd, struct sockaddr_in addr) : _state(READ), _bind(bind), _fd(fd), _addr(addr), _response(NULL)
+Client::Client(Bind &bind, int fd, struct sockaddr_in addr, Configuration &config) : _config(config), _state(READ), _bind(bind), _fd(fd), _addr(addr), _request(config), _response(NULL)
 {
 	std::cout << "Client " << fd << " created" << std::endl;
 }
 
-Client::Client(const Client &src) : _bind(src._bind), _response(NULL)
+Client::Client(const Client &src) : _config(src._config), _bind(src._bind), _request(src._config), _response(NULL)
 {
 	*this = src;
 }

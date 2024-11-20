@@ -107,7 +107,10 @@ int CGIHttpResponse::_writeCGI(struct pollfd &pollfd) {
 	if (ret == -1)
 		return -1;
 	if (ret != 0)
-	this->getRequest().getBodyBuffer().erase(0, ret);
+	{
+		this->getRequest().getBodyBuffer().erase(0, ret);
+		std::cout << "Wrote to cgi: " << ret << " bytes" << std::endl;
+	}
 	if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty())
 	{
 		pollfd.events = POLLIN;
@@ -163,8 +166,12 @@ std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &sc
 	env.push_back("REDIRECT_STATUS=CGI");
 	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
 	env.push_back("SERVER_SOFTWARE=webserv");
-	if (!this->getRequest().getHeader("Content-Length").empty())
-		env.push_back("CONTENT_LENGTH=" + this->getRequest().getHeader("Content-Length"));
+	if (this->getRequest().getContentLength() != 0)
+	{
+		std::stringstream ss;
+		ss << this->getRequest().getContentLength();
+		env.push_back("CONTENT_LENGTH=" + ss.str());
+	}
 	if (!this->getRequest().getHeader("Content-Type").empty())
 		env.push_back("CONTENT_TYPE=" + this->getRequest().getHeader("Content-Type"));
 	return env;

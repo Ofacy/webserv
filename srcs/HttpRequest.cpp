@@ -3,31 +3,42 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/18 19:56:40 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/20 19:52:29 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Configuration.hpp"
 #include "HttpRequest.hpp"
+#include "BodyParser.hpp"
+#include "ChunkedBodyParser.hpp"
 #include <cerrno>
 #include <iostream>
 #include <cstdlib>
 
-HttpRequest::HttpRequest() : HttpMessage(), _state(REQUEST_LINE), _current_body_size(0), _content_length(0) {}
+HttpRequest::HttpRequest(Configuration &config) : HttpMessage(), _config(config), _state(REQUEST_LINE), _body_parser(NULL), _content_length(0) {}
 
-HttpRequest::HttpRequest(const HttpRequest &src) : HttpMessage(src), _state(REQUEST_LINE), _current_body_size(0), _content_length(0) {
+HttpRequest::HttpRequest(const HttpRequest &src) : HttpMessage(src), _config(src._config), _state(REQUEST_LINE), _body_parser(NULL), _content_length(0) {
 	*this = src;
 }
 
-HttpRequest::~HttpRequest() {}
+HttpRequest::~HttpRequest() {
+	this->_config.removePollElement(this->_body_parser->getPollElement());
+}
 
 HttpRequest	&HttpRequest::operator=(const HttpRequest &rhs) {
 	if (this == &rhs)
 		return (*this);
 	this->_method = rhs._method;
 	this->_uri = rhs._uri;
+	this->_version = rhs._version;
+	this->_state = rhs._state;
+	this->_max_body_size = rhs._max_body_size;
+	this->_content_length = rhs._content_length;
+	this->_body_buffer = rhs._body_buffer;
+	this->_buffer = rhs._buffer;
 	return (*this);
 }
 
@@ -47,8 +58,24 @@ size_t	HttpRequest::getContentLength(void) const {
 	return (this->_content_length);
 }
 
+void	HttpRequest::setContentLength(size_t content_length) {
+	this->_content_length = content_length;
+}
+
+size_t	HttpRequest::getMaxBodySize(void) const {
+	return (this->_max_body_size);
+}
+
+void HttpRequest::setMaxBodySize(size_t max_body_size) {
+	this->_max_body_size = max_body_size;
+}
+
 HttpRequest::HttpRequestState	HttpRequest::getState(void) const {
 	return (this->_state);
+}
+
+void	HttpRequest::setState(HttpRequestState state) {
+	this->_state = state;
 }
 
 bool	HttpRequest::isDone(void) const {
@@ -60,20 +87,9 @@ bool	HttpRequest::isHeaderDone(void) const {
 }
 
 void	HttpRequest::update(char *buffer, size_t size) {
-	if (this->_state == BODY)
+	if (this->_state == BODY || this->_state == PARSING_BODY)
 	{
-		if (this->_current_body_size + size > this->_content_length)
-		{
-			this->_state = INVALID;
-			return ;
-		}
-		this->_body_buffer.append(buffer, size);
-		this->_current_body_size += size;
-		if (this->_current_body_size == this->_content_length)
-		{
-			this->_state = DONE;
-			std::cout << "Request body done" << std::endl;
-		}
+		this->_body_parser->update(buffer, size);
 		return ;
 	}
 	this->_buffer.append(buffer, size);
@@ -85,24 +101,19 @@ void	HttpRequest::update(char *buffer, size_t size) {
 		this->_buffer.erase(0, pos + 2);
 		if (this->_state == BODY)
 		{
-			char *endptr;
-			this->_content_length = std::strtoul(this->getHeader("Content-Length").c_str(), &endptr, 10);
-			if (*endptr != '\0' || errno == ERANGE)
-			{
+			try {
+				this->_body_parser = this->_selectBodyParser();
+				if (this->_body_parser->getPollElement())
+					this->_config.addPollElement(this->_body_parser->getPollElement());
+			}
+			catch(std::exception &e) {
 				this->_state = INVALID;
 				return ;
 			}
-			this->_body_buffer.append(this->_buffer);
-			_current_body_size = this->_body_buffer.size();
-			if (this->_body_buffer.size() >= this->_content_length)
-			{
-				this->_state = DONE;
-				this->_body_buffer.substr(0, this->_content_length);
-			}
+			this->_body_parser->update(this->_buffer.c_str(), this->_buffer.size());
 			return ;
 		}
 	}
-	return;
 }
 
 std::string &HttpRequest::getBodyBuffer(void) {
@@ -194,6 +205,22 @@ void	HttpRequest::_parseHeaderLine(std::string &line) {
 	//std::cout << "Header : " << key << ": " << value << std::endl;
 	this->setHeader(key, value);
 }
+
+BodyParser * HttpRequest::_selectBodyParser(void)
+{
+	if (this->getHeader("Transfer-Encoding") == "chunked")
+	{
+		std::cout << "Using chunked body parser" << std::endl;
+		return new ChunkedBodyParser(*this);
+	}
+	else if (!this->getHeader("Content-Length").empty())
+	{
+		std::cout << "Using content-length body parser" << std::endl;
+		return new BodyParser(*this);
+	}
+	return NULL;
+}
+
 
 bool	HttpRequest::hasBody(void) const {
 	return (!this->getHeader("Content-Length").empty() || this->getHeader("Transfer-Encoding") == "chunked");

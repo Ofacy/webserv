@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:19 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/15 19:02:54 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/20 19:50:57 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void Bind::listen(void) {
 	std::cout << "Listening on " << this->_host << ":" << this->_port << std::endl;
 }
 
-Client *Bind::accept(void) {
+Client *Bind::accept(Configuration &config) {
 	struct sockaddr_in addr;
 	socklen_t addr_len = sizeof(addr);
 	int fd = ::accept(this->_fd, (struct sockaddr *)&addr, &addr_len);
@@ -80,7 +80,7 @@ Client *Bind::accept(void) {
 		throw std::runtime_error("Failed to accept connection: " + std::string(std::strerror(errno)));
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
 		throw std::runtime_error("Failed to set socket to non-blocking: " + std::string(std::strerror(errno)));
-	return (new Client(*this, fd, addr));
+	return (new Client(*this, fd, addr, config));
 }
 
 void Bind::push_server(const Server &server) {
@@ -127,7 +127,7 @@ int	Bind::update(struct pollfd &pollfd, Configuration &config) {
 		this->listen();
 	}
 	if ((pollfd.revents & POLLIN) == POLLIN) {
-		Client *client = this->accept();
+		Client *client = this->accept(config);
 		config.addPollElement(client);
 	}
 	return (1);
