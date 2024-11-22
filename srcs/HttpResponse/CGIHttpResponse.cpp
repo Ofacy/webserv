@@ -66,7 +66,7 @@ int	CGIHttpResponse::update(struct pollfd &pollfd, Configuration &config) {
 		this->_writeCGI(pollfd);
 	if (pollfd.revents & POLLIN)
 		this->_readCGI(pollfd);
-	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL))
+	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL) && !(pollfd.revents & POLLIN))
 		this->_finish(pollfd);
 	return 1;
 }
@@ -76,6 +76,11 @@ int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 	int ret = read(this->_fd, buffer, CGI_READ_BUFFER_SIZE);
 	if (ret <= -1)
 		return (-1);
+	if (ret == 0)
+	{
+		this->_finish(pollfd);
+		return 1;
+	}
 	//std::cout << "Read from cgi: " << ret << " bytes" << std::endl;
 	if (!this->isHeaderReady())
 	{
@@ -117,6 +122,8 @@ int CGIHttpResponse::_writeCGI(struct pollfd &pollfd) {
 }
 
 void	CGIHttpResponse::_finishHeader() {
+	if (this->_cgi_headers.find("Status") == this->_cgi_headers.end())
+		this->_cgi_headers["Status"] = "200 OK";
 	this->createHeaderBuffer(atoi(this->_cgi_headers["Status"].c_str()), this->_cgi_headers);
 }
 
@@ -161,7 +168,7 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 	close(socket_pair[SOCKET_CHILD]);
 	this->_fd = socket_pair[SOCKET_PARENT];
 	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("Failed to set pipe to non-blocking: " + std::string(std::strerror(errno)));
+		throw std::runtime_error("Failed to set socket to non-blocking: " + std::string(std::strerror(errno)));
 }
 
 std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &script_path) {
@@ -228,13 +235,10 @@ void	CGIHttpResponse::_finish(struct pollfd &pollfd) {
 	if (this->_pid != -1)
 	{
 		kill(this->_pid, SIGKILL);
-		int status = this->_waitFork();
+		this->_waitFork();
 		this->_pid = -1;
-		if (status != 0)
-		{
-			if (!this->isHeaderReady())
-				this->createHeaderBuffer(500, std::map<std::string, std::string>());
-		}
+		if (!this->isHeaderReady())
+			this->createHeaderBuffer(500, std::map<std::string, std::string>());
 	}
 	this->setBufferDone(true);
 	pollfd.events = 0;
