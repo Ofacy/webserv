@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 12:24:17 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/22 12:32:02 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@ HttpRequest::HttpRequest(const HttpRequest &src) : HttpMessage(src), _config(src
 }
 
 HttpRequest::~HttpRequest() {
-	if (this->_body_parser->getPollElement())
-		this->_config.removePollElement(this->_body_parser->getPollElement());
-	else
-		delete this->_body_parser;
+	if (this->_body_parser) {
+		if (this->_body_parser->getPollElement())
+			this->_config.removePollElement(this->_body_parser->getPollElement());
+		else delete this->_body_parser;
+	}
 }
 
 
