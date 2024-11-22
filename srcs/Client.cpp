@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 17:09:08 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/22 21:27:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,10 +102,10 @@ int	Client::update(struct pollfd &pollfd, Configuration &config) {
 		if (this->_response->getPollElement() != NULL)
 			config.addPollElement(this->_response->getPollElement());
 		this->_state = this->_request.hasBody() ? READ_WRITE : WRITE;
-		pollfd.events = this->getEvents();
 	}
 	if (this->_request.isDone())
 		this->_state = WRITE;
+	pollfd.events = this->getEvents();
 	return (1);
 }
 
