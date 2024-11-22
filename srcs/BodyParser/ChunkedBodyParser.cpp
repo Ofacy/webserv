@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChunkedBodyParser.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 16:01:10 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 16:10:43 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/22 21:40:31 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ int	ChunkedBodyParser::update(struct pollfd &pollfd, Configuration &config) {
 	if (pollfd.revents & POLLOUT)
 		this->_writeFile(pollfd);
 	if (pollfd.revents & POLLIN)
-		this->_readFile();
+		this->_readFile(pollfd);
 	if (pollfd.revents & (POLLHUP | POLLERR) && this->_state != WRITE_RESPONSE)
 		this->getRequest().setState(HttpRequest::DONE);
 	return (1);
@@ -116,7 +116,7 @@ void ChunkedBodyParser::_writeFile(struct pollfd &pollfd) {
 	}
 }
 
-void ChunkedBodyParser::_readFile()
+void ChunkedBodyParser::_readFile(struct pollfd &pollfd)
 {
 	char buffer[FILE_READ_SIZE];
 
@@ -129,6 +129,7 @@ void ChunkedBodyParser::_readFile()
 	this->getRequest().getBodyBuffer().append(buffer, read_bytes);
 	if (this->_chunk_size == this->getRequest().getContentLength()) {
 		this->getRequest().setState(HttpRequest::DONE);
+		pollfd.events = 0;
 	}
 }
 

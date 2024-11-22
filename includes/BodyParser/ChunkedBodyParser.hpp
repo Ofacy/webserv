@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChunkedBodyParser.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 16:01:31 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 17:11:32 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/22 21:19:55 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ public:
 
 private:
 	void		_writeFile(struct pollfd &pollfd);
-	void		_readFile();
+	void		_readFile(struct pollfd &pollfd);
 	int 		_readChunkSize();
 	int 		_readChunk();
 	int 		_readChunkEnd();
