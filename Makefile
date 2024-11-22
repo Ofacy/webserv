@@ -6,13 +6,13 @@
 #    By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/11/20 19:13:08 by bwisniew         ###   ########.fr        #
+#    Updated: 2024/11/22 16:27:44 by bwisniew         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CXX = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -MMD -MP -g3
+CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -MMD -MP -O3
 
 SRCS_DIR = srcs
 
@@ -31,7 +31,6 @@ SRCS += $(HTTPRESPONSE_SRCS:%.cpp=HttpResponse/%.cpp)
 
 BODYPARSER_SRCS = BodyParser.cpp ChunkedBodyParser.cpp
 SRCS += $(BODYPARSER_SRCS:%.cpp=BodyParser/%.cpp)
-
 
 INCLUDE = includes includes/config includes/config/parsing includes/config/parsing/Token includes/HttpResponse includes/BodyParser
 
@@ -62,8 +61,17 @@ fclean: clean
 re: fclean $(NAME)
 
 valgrind: $(NAME)
-	valgrind --exit-on-first-error=yes --error-exitcode=42 --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --log-file=valgrind.log ./$(NAME) tester.conf
+	valgrind --exit-on-first-error=yes --error-exitcode=42 --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=all --log-file=valgrind.log ./$(NAME) tester.conf
+
+cgi: cgi/env_cgi cgi/upper_cgi
+
+cgi/env_cgi: cgi/env_cgi.cpp
+	$(CXX) -o $@ $<
+
+cgi/upper_cgi: cgi/upper_cgi.cpp
+	$(CXX) -o $@ $<
+
 
 -include $(DEP)
 
-.PHONY: all clean fclean re valgrind
+.PHONY: all clean fclean re valgrind cgi

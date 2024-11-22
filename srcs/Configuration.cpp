@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 17:24:10 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/22 12:49:13 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,6 @@ void Configuration::_poll() {
 			throw std::runtime_error("Failed to poll: " + std::string(std::strerror(errno)));
 		}
 		for (size_t i = 0; i < this->_pollfds.size(); i++) {
-			if (this->_pollfds[i].revents == 0)
-				continue;
 			IPollElement *poll_element = this->_poll_elements[i];
 			struct pollfd pollfd = this->_pollfds[i];
 			if (poll_element->update(pollfd, *this) <= 0)

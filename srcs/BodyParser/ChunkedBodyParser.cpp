@@ -6,7 +6,7 @@
 /*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 16:01:10 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/20 19:46:28 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/22 16:10:43 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,9 @@ void ChunkedBodyParser::_writeFile(struct pollfd &pollfd) {
 		this->_fd = open(this->_filename.c_str(), O_RDONLY | O_NONBLOCK);
 		if (this->_fd == -1) {
 			this->_invalidate();
+			return ;
 		}
+		std::cout << "Chunked body fully parsed" << std::endl;
 		this->getRequest().setState(HttpRequest::BODY);
 		pollfd.fd = this->_fd;
 		pollfd.events = this->getEvents();
@@ -141,24 +143,23 @@ int ChunkedBodyParser::_readChunkSize() {
 		this->_invalidate();
 		return 1;
 	}
-	if (this->_chunk_size == 0) {
-		this->_state = WRITE_RESPONSE;
-		return 1;
-	}
 	this->_buffer.erase(0, pos + 2);
+	if (this->_chunk_size == 0) {
+		this->_state = READ_CHUNK_END;
+		return 0;
+	}
 	this->_state = READ_CHUNK;
-	std::cout << "Chunk size: " << this->_chunk_size << std::endl;
 	return 0;
 }
 
 int ChunkedBodyParser::_readChunk() {
 	size_t	buffer_size = this->_buffer.size();
 	this->_file_buffer.append(this->_buffer, 0, this->_chunk_size);
+	this->_buffer.erase(0, this->_chunk_size);
 	if (this->_chunk_size > buffer_size) {
 		this->_chunk_size -= buffer_size;
 		return 1;
 	}
-	this->_buffer.erase(0, this->_chunk_size);
 	this->_state = READ_CHUNK_END;
 	return 0;
 }
@@ -171,6 +172,11 @@ int ChunkedBodyParser::_readChunkEnd() {
 		return 1;
 	}
 	this->_buffer.erase(0, 2);
+	if (this->_chunk_size == 0) {
+		this->_state = WRITE_RESPONSE;
+		std::cout << "Chunked body fully parsed" << std::endl;
+		return 1;
+	}
 	this->_chunk_size = 0;
 	this->_state = READ_CHUNK_SIZE;
 	return 0;
