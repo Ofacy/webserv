@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   StatusHttpResponse.cpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:44:11 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/22 11:11:01 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,12 @@ StatusHttpResponse::StatusHttpResponse(HttpRequest &request, uint16_t code, cons
 StatusHttpResponse::StatusHttpResponse(HttpRequest &request, uint16_t code) : AHttpResponse(request) {
 	std::map<std::string, std::string> headers;
 	std::stringstream ss;
-	std::string body = this->getReasonPhrase(code);
+	std::stringstream code_ss;
+	code_ss << code;
+	std::string body(STATUS_PAGE);
+	body.replace(body.find("#title#"), 7, code_ss.str() + " - " + this->getReasonPhrase(code));
+	body.replace(body.find("#code#"), 6, code_ss.str());
+	body.replace(body.find("#message#"), 9, this->getReasonPhrase(code));
 	ss << body.size();
 	headers["Content-Type"] = "text/html";
 	headers["Content-Length"] = ss.str();
