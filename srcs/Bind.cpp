@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Bind.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:19 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/20 19:50:57 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/23 00:23:51 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ Client *Bind::accept(Configuration &config) {
 	socklen_t addr_len = sizeof(addr);
 	int fd = ::accept(this->_fd, (struct sockaddr *)&addr, &addr_len);
 	if (fd == -1)
-		throw std::runtime_error("Failed to accept connection: " + std::string(std::strerror(errno)));
+		return (NULL);
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
 		throw std::runtime_error("Failed to set socket to non-blocking: " + std::string(std::strerror(errno)));
 	return (new Client(*this, fd, addr, config));
@@ -128,7 +128,8 @@ int	Bind::update(struct pollfd &pollfd, Configuration &config) {
 	}
 	if ((pollfd.revents & POLLIN) == POLLIN) {
 		Client *client = this->accept(config);
-		config.addPollElement(client);
+		if (client)
+			config.addPollElement(client);
 	}
 	return (1);
 }
