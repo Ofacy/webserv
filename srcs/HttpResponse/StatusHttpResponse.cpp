@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   StatusHttpResponse.cpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:44:11 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 11:11:01 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/23 15:09:25 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@ StatusHttpResponse::StatusHttpResponse(HttpRequest &request, uint16_t code, cons
 	headers["Content-Type"] = "text/html";
 	headers["Content-Length"] = ss.str();
 	this->createHeaderBuffer(code, headers);
-	*this << body;
 	this->setBufferDone(true);
+	if (request.getMethod() != "HEAD")
+		*this << body;
 }
 
 StatusHttpResponse::StatusHttpResponse(HttpRequest &request, uint16_t code) : AHttpResponse(request) {
@@ -37,7 +38,8 @@ StatusHttpResponse::StatusHttpResponse(HttpRequest &request, uint16_t code) : AH
 	headers["Content-Type"] = "text/html";
 	headers["Content-Length"] = ss.str();
 	this->createHeaderBuffer(code, headers);
-	*this << body;
+	if (request.getMethod() != "HEAD")
+		*this << body;
 	this->setBufferDone(true);
 }
 

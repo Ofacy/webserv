@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   InheritedParameters.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/20 16:14:01 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/23 15:28:37 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 
 const std::string	InheritedParameters::_supported_methods[NB_SUPPORTED_METHODS] = {
 	"GET",
+	"HEAD",
 	"POST",
 	"DELETE",
 	"PUT"
