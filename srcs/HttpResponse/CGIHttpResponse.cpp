@@ -36,6 +36,11 @@ CGIHttpResponse::CGIHttpResponse(const CGIHttpResponse &src) : AHttpResponse(src
 CGIHttpResponse::~CGIHttpResponse(void) {
 	if(this->_fd != -1)
 		close(this->_fd);
+	if (this->_pid != -1)
+	{
+		kill(this->_pid, SIGKILL);
+		this->_waitFork();
+	}
 }
 
 CGIHttpResponse &CGIHttpResponse::operator=(const CGIHttpResponse &rhs) {
@@ -66,7 +71,8 @@ int	CGIHttpResponse::update(struct pollfd &pollfd, Configuration &config) {
 		this->_writeCGI(pollfd);
 	if (pollfd.revents & POLLIN)
 		this->_readCGI(pollfd);
-	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL) && !(pollfd.revents & POLLIN))
+	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL)
+		&& ((this->getRequest().getMethod() == "HEAD" && this->isHeaderReady()) || !(pollfd.revents & POLLIN)))
 		this->_finish(pollfd);
 	return 1;
 }
@@ -99,10 +105,12 @@ int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 		}
 		if (this->isHeaderReady())
 		{
-			this->appendBody(this->_read_buffer);
+			if (this->getRequest().getMethod() != "HEAD")
+				this->appendBody(this->_read_buffer);
+			this->_read_buffer.clear();
 		}
 	}
-	else
+	else if (this->getRequest().getMethod() != "HEAD")
 		this->appendBody(buffer, ret);
 	return 1;
 }
@@ -135,8 +143,7 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 	if (this->_pid == -1) {
 		throw std::runtime_error("Failed to fork: " + std::string(std::strerror(errno)));
 	}
-	else if (this->_pid == 0)
-	{
+	else if (this->_pid == 0) {
 		close(socket_pair[SOCKET_PARENT]);
 		if ((this->getRequest().getContentLength() > 0 && dup2(socket_pair[SOCKET_CHILD], STDIN_FILENO) == -1)
 			|| dup2(socket_pair[SOCKET_CHILD], STDOUT_FILENO) == -1)
@@ -174,8 +181,7 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &script_path) {
 	std::vector<std::string> env;
 
-	for (std::map<std::string, std::string>::const_iterator it = this->getRequest().getHeaders().begin(); it != this->getRequest().getHeaders().end(); it++)
-	{
+	for (std::map<std::string, std::string>::const_iterator it = this->getRequest().getHeaders().begin(); it != this->getRequest().getHeaders().end(); it++) {
 		std::string name = it->first;
 		for (size_t i = 0; i < name.size(); i++)
 		{
@@ -193,8 +199,7 @@ std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &sc
 	env.push_back("REDIRECT_STATUS=CGI");
 	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
 	env.push_back("SERVER_SOFTWARE=webserv");
-	if (this->getRequest().getContentLength() != 0)
-	{
+	if (this->getRequest().getContentLength() != 0) {
 		std::stringstream ss;
 		ss << this->getRequest().getContentLength();
 		env.push_back("CONTENT_LENGTH=" + ss.str());
@@ -232,8 +237,7 @@ int	CGIHttpResponse::_waitFork() {
 }
 
 void	CGIHttpResponse::_finish(struct pollfd &pollfd) {
-	if (this->_pid != -1)
-	{
+	if (this->_pid != -1) {
 		kill(this->_pid, SIGKILL);
 		this->_waitFork();
 		this->_pid = -1;

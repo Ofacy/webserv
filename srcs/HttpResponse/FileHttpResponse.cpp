@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 18:28:08 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/23 15:15:11 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,12 @@ FileHttpResponse::FileHttpResponse(HttpRequest &request, uint16_t status, int fd
 	ss << stats.st_size;
 	headers["Content-Length"] = ss.str();
 	this->createHeaderBuffer(status, headers);
+	if (request.getMethod() == "HEAD")
+	{
+		this->setBufferDone(true);
+		close(this->_fd);
+		this->_fd = -1;
+	}
 }
 
 FileHttpResponse::FileHttpResponse(const FileHttpResponse &src) : AHttpResponse(src)
@@ -50,6 +56,8 @@ FileHttpResponse::~FileHttpResponse()
 
 IPollElement *FileHttpResponse::getPollElement()
 {
+	if (this->_fd == -1)
+		return NULL;
 	return this;
 }
 
@@ -74,22 +82,21 @@ int FileHttpResponse::update(pollfd &pollfd, Configuration &config)
 		if (read_bytes == -1)
 		{
 			std::cerr << "Error reading file" << std::endl;
-			return -1;
+			this->setBufferDone(true);
+			return 1;
 		}
 		if (read_bytes == 0)
 		{
 			this->setBufferDone(true);
-			::close(this->_fd);
-			this->_fd = -1;
 			pollfd.events = 0;
-			pollfd.fd = -1;
 		}
 		this->appendBody(buffer, read_bytes);
 	}
 	else if (pollfd.revents & (POLLERR | POLLHUP))
 	{
 		std::cerr << "Error reading file" << std::endl;
-		return -1;
+		this->setBufferDone(true);
+		return 1;
 	}
 	return 1;
 }

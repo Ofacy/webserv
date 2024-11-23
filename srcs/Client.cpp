@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 21:27:54 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/23 15:48:00 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ int	Client::update(struct pollfd &pollfd, Configuration &config) {
 		}
 		//std::cout << "Client " << this->_fd << " is ready to write" << std::endl;
 	}
-	if (pollfd.revents & POLLHUP || pollfd.revents & POLLERR) {
+	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {
 		//std::cout << "Client " << this->_fd << " disconnected" << std::endl;
 		this->_cleanResponse(config);
 		return (-1);

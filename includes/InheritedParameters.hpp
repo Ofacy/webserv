@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:30:26 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/18 16:15:54 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/23 15:08:32 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include "HttpRequest.hpp"
 # include "AHttpResponse.hpp"
 
-#define NB_SUPPORTED_METHODS 4
+#define NB_SUPPORTED_METHODS 5
 
 class InheritedParameters : public AAttributeParser {
 	public:

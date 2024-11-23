@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 12:32:02 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/23 16:02:32 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,15 +84,15 @@ void	HttpRequest::setState(HttpRequestState state) {
 }
 
 bool	HttpRequest::isDone(void) const {
-	return (this->_state == DONE || this->_state == INVALID);
+	return (this->getState() == DONE || this->getState() == INVALID);
 }
 
 bool	HttpRequest::isHeaderDone(void) const {
-	return (this->_state == DONE || this->_state == BODY || this->_state == INVALID);
+	return (this->getState() == DONE || this->getState() == BODY || this->getState() == INVALID);
 }
 
 void	HttpRequest::update(char *buffer, size_t size) {
-	if (this->_state == BODY || this->_state == PARSING_BODY)
+	if (this->getState() == BODY || this->getState() == PARSING_BODY)
 	{
 		this->_body_parser->update(buffer, size);
 		return ;
@@ -104,7 +104,7 @@ void	HttpRequest::update(char *buffer, size_t size) {
 		line = this->_buffer.substr(0, pos);
 		this->_parseLine(line);
 		this->_buffer.erase(0, pos + 2);
-		if (this->_state == BODY)
+		if (this->getState() == BODY)
 		{
 			try {
 				this->_body_parser = this->_selectBodyParser();
@@ -112,7 +112,8 @@ void	HttpRequest::update(char *buffer, size_t size) {
 					this->_config.addPollElement(this->_body_parser->getPollElement());
 			}
 			catch(std::exception &e) {
-				this->_state = INVALID;
+				this->setState(INVALID);
+				std::cerr << "Failed to select body parser: " << e.what() << std::endl;
 				return ;
 			}
 			this->_body_parser->update(this->_buffer.c_str(), this->_buffer.size());
@@ -126,14 +127,14 @@ std::string &HttpRequest::getBodyBuffer(void) {
 }
 
 void	HttpRequest::_parseLine(std::string &line) {
-	if (this->_state == REQUEST_LINE)
+	if (this->getState() == REQUEST_LINE)
 		this->_parseRequestLine(line);
-	else if (this->_state == HEADERS)
+	else if (this->getState() == HEADERS)
 	{
 		std::cout << "Header line: " << line << std::endl;
 		if (line.empty())
 		{
-			this->_state = this->hasBody() ? BODY : DONE;
+			this->setState(this->hasBody() ? BODY : DONE);
 			return ;
 		}
 		this->_parseHeaderLine(line);
@@ -151,7 +152,7 @@ void	HttpRequest::_parseLine(std::string &line) {
 void	HttpRequest::_parseRequestLine(std::string &line) {
 	std::cout << "Request line: " << line << std::endl;
 	if (line.find("\r") != std::string::npos || line.find("\n") != std::string::npos) {
-		this->_state = INVALID;
+		this->setState(INVALID);
 		return ;
 	}
 	
@@ -166,7 +167,7 @@ void	HttpRequest::_parseRequestLine(std::string &line) {
 	}
 	this->_version = line;
 	if (this->_method.empty() || this->_uri.empty() || this->_version.empty() || this->_version.find(" ") != std::string::npos) {
-		this->_state = INVALID;
+		this->setState(INVALID);
 		return ;
 	}
 	std::cout << "========== " << std::endl;
@@ -174,9 +175,9 @@ void	HttpRequest::_parseRequestLine(std::string &line) {
 	std::cout << "URI: " << this->_uri << std::endl;
 	std::cout << "Version: " << this->_version << std::endl;
 	std::cout << "========== " << std::endl;
-	this->_state = HEADERS;
+	this->setState(HEADERS);
 	if (this->_version != "HTTP/1.1") {
-		this->_state = INVALID;
+		this->setState(INVALID);
 		return ;
 	}
 }
@@ -195,12 +196,12 @@ void	HttpRequest::_parseRequestLine(std::string &line) {
 void	HttpRequest::_parseHeaderLine(std::string &line) {
 	size_t pos = line.find(':');
 	if (pos == std::string::npos) {
-		this->_state = INVALID;
+		this->setState(INVALID);
 		return ;
 	}
 	std::string key = line.substr(0, pos);
 	if (key.find_first_not_of(" \t") == std::string::npos) {
-		this->_state = INVALID;
+		this->setState(INVALID);
 		return ;
 	}
 	size_t value_pos = line.find_first_not_of(" \t", pos + 1);

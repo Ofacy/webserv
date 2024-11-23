@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   DirHttpResponse.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:52:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 22:55:07 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/23 14:57:43 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,9 @@ DirHttpResponse::DirHttpResponse(HttpRequest &request, uint16_t status, const st
 	}
 	body.replace(body.find("#table#"), 7, ss.str());
 	this->createHeaderBuffer(status, headers);
-	this->appendBody(body);
 	closedir(dir);
+	if (request.getMethod() != "HEAD")
+		this->appendBody(body);
 	this->setBufferDone(true);
 }
 
