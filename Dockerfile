@@ -10,7 +10,5 @@ COPY . .
 RUN make
 
 EXPOSE 8080
-EXPOSE 8082
-EXPOSE 8083
 
-CMD ["/app/webserv"]
+CMD ["/app/webserv", "/app/benchmark/benchmark.conf"]

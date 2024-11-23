@@ -1,0 +1,13 @@
+FROM debian:latest
+
+WORKDIR /app
+
+RUN apt update && apt install -y \
+	nginx
+
+COPY ./benchmark/benchmark.nginx.conf /etc/nginx/sites-available/default
+COPY ./subject_tests/ /app/subject_tests/
+
+EXPOSE 8081
+
+CMD ["nginx", "-g", "daemon off;"]
