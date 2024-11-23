@@ -1,9 +1,9 @@
-FROM ubuntu:latest
+FROM debian:latest
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-	php-cgi build-essential valgrind
+RUN apt update && apt install -y \
+	php-cgi g++ make valgrind
 
 COPY . .
 

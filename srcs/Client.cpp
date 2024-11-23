@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/20 19:52:31 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/22 21:27:54 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,8 @@ short	Client::getEvents() const
 }
 
 int	Client::update(struct pollfd &pollfd, Configuration &config) {
-	if (pollfd.revents & POLLIN) {
-		if (this->_updateRead(pollfd, config) <= 0)
+	if (pollfd.revents & POLLIN && (this->_state == READ || this->_state == READ_WRITE)) {
+		if (this->_updateRead() <= 0)
 		{
 			this->_cleanResponse(config);
 			return (-1);
@@ -88,15 +88,6 @@ int	Client::update(struct pollfd &pollfd, Configuration &config) {
 		this->_cleanResponse(config);
 		return (-1);
 	}
-	return (1);
-}
-
-int	Client::_updateRead(struct pollfd &fd, Configuration &config) {
-	char buffer[CLIENT_RECV_SIZE];
-	int ret = recv(this->_fd, buffer, CLIENT_RECV_SIZE, 0);
-	if (ret < 0)
-		return (-1);
-	this->_request.update(buffer, ret);
 	if (this->_request.isHeaderDone() && this->_response == NULL) {
 		try {
 			if (this->_request.getState() == HttpRequest::INVALID)
@@ -111,10 +102,19 @@ int	Client::_updateRead(struct pollfd &fd, Configuration &config) {
 		if (this->_response->getPollElement() != NULL)
 			config.addPollElement(this->_response->getPollElement());
 		this->_state = this->_request.hasBody() ? READ_WRITE : WRITE;
-		fd.events = this->getEvents();
 	}
 	if (this->_request.isDone())
 		this->_state = WRITE;
+	pollfd.events = this->getEvents();
+	return (1);
+}
+
+int	Client::_updateRead() {
+	char buffer[CLIENT_RECV_SIZE];
+	int ret = recv(this->_fd, buffer, CLIENT_RECV_SIZE, 0);
+	if (ret < 0)
+		return (-1);
+	this->_request.update(buffer, ret);
 	return (1);
 }
 

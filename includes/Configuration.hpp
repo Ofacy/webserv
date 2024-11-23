@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:08:06 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/15 16:47:52 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/22 21:59:42 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Configuration : public InheritedParameters {
 		std::vector<struct pollfd>	_pollfds;
 		std::vector<IPollElement *>	_poll_elements;
 		std::vector<Bind *>			_binds;
+		size_t						_polli;
 		static bool					_exit;
 };
 

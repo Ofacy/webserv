@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 17:24:10 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/22 23:03:17 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,22 +109,20 @@ void Configuration::_poll() {
 				continue;
 			throw std::runtime_error("Failed to poll: " + std::string(std::strerror(errno)));
 		}
-		for (size_t i = 0; i < this->_pollfds.size(); i++) {
-			if (this->_pollfds[i].revents == 0)
-				continue;
-			IPollElement *poll_element = this->_poll_elements[i];
-			struct pollfd pollfd = this->_pollfds[i];
+		for (this->_polli = 0; this->_polli < this->_pollfds.size(); this->_polli++) {
+			IPollElement *poll_element = this->_poll_elements[this->_polli];
+			struct pollfd pollfd = this->_pollfds[this->_polli];
 			if (poll_element->update(pollfd, *this) <= 0)
 			{
 				// std::cout << "Removing poll element with fd = " << poll_element->getFd() << std::endl;
 				// std::cout << "poll_elements size = " << this->_poll_elements.size() << std::endl;
-				this->_poll_elements.erase(this->_poll_elements.begin() + i);
+				this->_poll_elements.erase(this->_poll_elements.begin() + this->_polli);
+				this->_pollfds.erase(this->_pollfds.begin() + this->_polli);
+				this->_polli--;
 				delete poll_element;
-				this->_pollfds.erase(this->_pollfds.begin() + i);
-				i--;
 			}
 			else
-				this->_pollfds[i] = pollfd;
+				this->_pollfds[this->_polli] = pollfd;
 		}
 	}
 }
@@ -138,6 +136,8 @@ void	Configuration::removePollElement(IPollElement *poll_element)
 			this->_poll_elements.erase(this->_poll_elements.begin() + i);
 			this->_pollfds.erase(this->_pollfds.begin() + i);
 			delete poll_element;
+			if (i <= this->_polli)
+				this->_polli--;
 			break;
 		}
 	}

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   upper_cgi.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/22 14:33:30 by lcottet           #+#    #+#             */
+/*   Updated: 2024/11/22 14:37:30 by bwisniew         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -6,7 +18,7 @@
 #include <math.h>
 #include <iostream>
 
-# define MAX(a,b) ((a) > (b) ? (a) : (b))
+# define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 # define READ_BUFFER_SIZE 65536
 
@@ -24,12 +36,12 @@ int main(int argc, char *argv[], char *envp[]) {
 	}
 	std::cout << "Content-Length: " << content_length << "\r\n\r\n";
 	size_t read_data = 0;
-	while (read_data < content_length && (ret = read(0, buffer, MAX(READ_BUFFER_SIZE, content_length - read_data))) > 0)
+	while (read_data < content_length && (ret = read(0, buffer, MIN(READ_BUFFER_SIZE, content_length - read_data))) > 0)
 	{
 		read_data+=ret;
 		for (size_t j = 0; j < ret; j++)
 			buffer[j] = toupper(buffer[j]);
-		std::cout.write(buffer, ret);
+		std::cout << std::string(buffer, ret);
 	}
 	return 0;
 }

@@ -62,11 +62,11 @@ short	CGIHttpResponse::getEvents() const {
 
 int	CGIHttpResponse::update(struct pollfd &pollfd, Configuration &config) {
 	(void)config;
-	if (pollfd.revents & POLLOUT)
+	if (pollfd.revents & POLLOUT && !(pollfd.revents & (POLLERR | POLLHUP | POLLNVAL)))
 		this->_writeCGI(pollfd);
 	if (pollfd.revents & POLLIN)
 		this->_readCGI(pollfd);
-	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL))
+	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL) && !(pollfd.revents & POLLIN))
 		this->_finish(pollfd);
 	return 1;
 }
@@ -76,7 +76,12 @@ int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 	int ret = read(this->_fd, buffer, CGI_READ_BUFFER_SIZE);
 	if (ret <= -1)
 		return (-1);
-	std::cout << "Read from cgi: " << ret << " bytes" << std::endl;
+	if (ret == 0)
+	{
+		this->_finish(pollfd);
+		return 1;
+	}
+	//std::cout << "Read from cgi: " << ret << " bytes" << std::endl;
 	if (!this->isHeaderReady())
 	{
 		this->_read_buffer.append(buffer, ret);
@@ -107,10 +112,7 @@ int CGIHttpResponse::_writeCGI(struct pollfd &pollfd) {
 	if (ret == -1)
 		return -1;
 	if (ret != 0)
-	{
 		this->getRequest().getBodyBuffer().erase(0, ret);
-		std::cout << "Wrote to cgi: " << ret << " bytes" << std::endl;
-	}
 	if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty())
 	{
 		pollfd.events = POLLIN;
@@ -120,6 +122,8 @@ int CGIHttpResponse::_writeCGI(struct pollfd &pollfd) {
 }
 
 void	CGIHttpResponse::_finishHeader() {
+	if (this->_cgi_headers.find("Status") == this->_cgi_headers.end())
+		this->_cgi_headers["Status"] = "200 OK";
 	this->createHeaderBuffer(atoi(this->_cgi_headers["Status"].c_str()), this->_cgi_headers);
 }
 
@@ -134,8 +138,19 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 	else if (this->_pid == 0)
 	{
 		close(socket_pair[SOCKET_PARENT]);
-		if (dup2(socket_pair[SOCKET_CHILD], STDIN_FILENO) == -1 || dup2(socket_pair[SOCKET_CHILD], STDOUT_FILENO) == -1)
+		if ((this->getRequest().getContentLength() > 0 && dup2(socket_pair[SOCKET_CHILD], STDIN_FILENO) == -1)
+			|| dup2(socket_pair[SOCKET_CHILD], STDOUT_FILENO) == -1)
 			exit(1);
+		else if (this->getRequest().getContentLength() == 0) {
+			int	fd[2];
+
+			if (pipe(fd) == -1)
+				exit(1);
+			if (dup2(fd[0], STDIN_FILENO) == -1)
+				exit(1);
+			close(fd[0]);
+			close(fd[1]);
+		}
 		close(socket_pair[SOCKET_CHILD]);
 		std::vector<std::string> env = this->_generateForkEnv(script_path);
 		std::vector<char *> env_c;
@@ -153,16 +168,28 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 	close(socket_pair[SOCKET_CHILD]);
 	this->_fd = socket_pair[SOCKET_PARENT];
 	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("Failed to set pipe to non-blocking: " + std::string(std::strerror(errno)));
+		throw std::runtime_error("Failed to set socket to non-blocking: " + std::string(std::strerror(errno)));
 }
 
 std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &script_path) {
 	std::vector<std::string> env;
 
-	env.push_back("PATH_INFO=" + script_path);
+	for (std::map<std::string, std::string>::const_iterator it = this->getRequest().getHeaders().begin(); it != this->getRequest().getHeaders().end(); it++)
+	{
+		std::string name = it->first;
+		for (size_t i = 0; i < name.size(); i++)
+		{
+			name[i] = std::toupper(name[i]);
+			if (name[i] == '-')
+				name[i] = '_';
+		}
+		env.push_back("HTTP_" + name + "=" + it->second);
+	}
+	env.push_back("PATH_INFO=" + this->getRequest().getUri());
 	env.push_back("SCRIPT_FILENAME=" + script_path);
 	env.push_back("REQUEST_METHOD=" + this->getRequest().getMethod());
 	env.push_back("SERVER_PROTOCOL=" + std::string(HTTP_VERSION));
+	env.push_back("REQUEST_URI=" + this->getRequest().getUri());
 	env.push_back("REDIRECT_STATUS=CGI");
 	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
 	env.push_back("SERVER_SOFTWARE=webserv");
@@ -199,17 +226,20 @@ void	CGIHttpResponse::_parseHeaderLine(struct pollfd &pollfd, std::string &line)
 int	CGIHttpResponse::_waitFork() {
 	int status;
 	waitpid(this->_pid, &status, 0);
-	std::cout << "Child exited with status " << WEXITSTATUS(status) << std::endl;
+	this->_pid = -1;
+	std::cout << "Child exited with status " << WEXITSTATUS(status) << " and signal " << WSTOPSIG(status) << std::endl;
 	return status;
 }
 
 void	CGIHttpResponse::_finish(struct pollfd &pollfd) {
-	int status = this->_waitFork();
-	this->setBufferDone(true);
-	pollfd.events = 0;
-	if (status != 0)
+	if (this->_pid != -1)
 	{
+		kill(this->_pid, SIGKILL);
+		this->_waitFork();
+		this->_pid = -1;
 		if (!this->isHeaderReady())
 			this->createHeaderBuffer(500, std::map<std::string, std::string>());
 	}
+	this->setBufferDone(true);
+	pollfd.events = 0;
 }
