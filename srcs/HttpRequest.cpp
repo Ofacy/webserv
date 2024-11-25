@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 18:10:22 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,7 @@ void	HttpRequest::update(char *buffer, size_t size) {
 				return ;
 			}
 			this->_body_parser->update(this->_buffer.c_str(), this->_buffer.size());
+			this->_buffer.clear();
 			return ;
 		}
 	}

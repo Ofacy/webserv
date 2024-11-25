@@ -92,7 +92,7 @@ int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 		this->_read_buffer.append(buffer, ret);
 		std::string line;
 		size_t pos;
-		while ((pos = this->_read_buffer.find("\r\n")) != std::string::npos) {
+		while ((pos = this->_read_buffer.find("\r\n")) != std::string::npos && !this->isHeaderReady()) {
 			line = this->_read_buffer.substr(0, pos);
 			if (line.empty())
 			{
