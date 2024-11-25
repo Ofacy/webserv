@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 17:20:04 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 21:32:05 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,9 @@ std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
 			break;
 		case 413:
 			return "Payload Too Large";
+			break;
+		case 414:
+			return "URI Too Long";
 			break;
 		case 500:
 			return "Internal Server Error";

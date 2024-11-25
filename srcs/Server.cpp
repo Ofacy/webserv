@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:20:50 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 14:47:58 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 21:32:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,4 @@ bool	Server::parseAttribute(const Attribute &child) {
 		return (true);
 	}
 	return (false);
-	//else
-	//	throw InvalidAttributeException(child.getName(), "server");
 }

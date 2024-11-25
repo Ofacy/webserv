@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:08:06 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/22 21:59:42 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 21:32:06 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 # include "Server.hpp"
 # include <vector>
 # include <string>
+
+# define DEFAULT_MAX_HEADER_SIZE 8192
 
 class Client;
 
@@ -31,6 +33,7 @@ class Configuration : public InheritedParameters {
 		Configuration	&operator=(const Configuration &rhs);
 		void			addPollElement(IPollElement *poll_element);
 		void			removePollElement(IPollElement *poll_element);
+		size_t			getClientMaxHeaderSize(void) const;
 		static 			void	exit();
 
 	private:
@@ -43,6 +46,7 @@ class Configuration : public InheritedParameters {
 		std::vector<IPollElement *>	_poll_elements;
 		std::vector<Bind *>			_binds;
 		size_t						_polli;
+		size_t						_client_max_header_size;
 		static bool					_exit;
 };
 

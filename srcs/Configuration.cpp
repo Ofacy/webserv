@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Configuration.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 17:20:00 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 21:3651 by bwisniew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,15 @@
 
 bool Configuration::_exit = false;
 
-Configuration::Configuration(void) {};
+Configuration::Configuration(void) : InheritedParameters(), _client_max_header_size(DEFAULT_MAX_HEADER_SIZE) {
+	this->_poll();
+};
 
-Configuration::Configuration(const Configuration &src) : InheritedParameters(src) {
+Configuration::Configuration(const Configuration &src) : InheritedParameters(src), _client_max_header_size(DEFAULT_MAX_HEADER_SIZE) {
 	*this = src;
 }
 
-Configuration::Configuration(const std::string &config_path) {
+Configuration::Configuration(const std::string &config_path) : InheritedParameters(), _client_max_header_size(DEFAULT_MAX_HEADER_SIZE) {
 	std::ifstream file(config_path.c_str());
 
 	if (!file.is_open()) {
@@ -65,6 +67,24 @@ void	Configuration::addPollElement(IPollElement *poll_element) {
 	this->_pollfds.push_back(pollfd);
 }
 
+void	Configuration::removePollElement(IPollElement *poll_element)
+{
+	for (size_t i = 0; i < this->_poll_elements.size(); i++) {
+		if (this->_poll_elements[i] == poll_element) {
+			this->_poll_elements.erase(this->_poll_elements.begin() + i);
+			this->_pollfds.erase(this->_pollfds.begin() + i);
+			delete poll_element;
+			if (i <= this->_polli)
+				this->_polli--;
+			break;
+		}
+	}
+}
+
+size_t	Configuration::getClientMaxHeaderSize() const {
+	return (this->_client_max_header_size);
+}
+
 bool	Configuration::parseAttribute(const Attribute &child) {
 	if (InheritedParameters::parseAttribute(child))
 		return (true);
@@ -74,6 +94,13 @@ bool	Configuration::parseAttribute(const Attribute &child) {
 	}
 	if (child.getName() == "access_log") {
 		AccessLog::getInstance(child.getParameters(1)[0]);
+		return (true);
+	}
+	if (child.getName() == "client_max_header_size") {
+		char *endPtr;
+		this->_client_max_header_size = std::strtoul(child.getParameters(1)[0].c_str(), &endPtr, 10);
+		if (*endPtr != '\0' || errno == ERANGE)
+			throw std::runtime_error("Invalid value for client_max_header_size");
 		return (true);
 	}
 	return (false);
@@ -124,20 +151,6 @@ void Configuration::_poll() {
 			}
 			else
 				this->_pollfds[this->_polli] = pollfd;
-		}
-	}
-}
-
-void	Configuration::removePollElement(IPollElement *poll_element)
-{
-	for (size_t i = 0; i < this->_poll_elements.size(); i++) {
-		if (this->_poll_elements[i] == poll_element) {
-			this->_poll_elements.erase(this->_poll_elements.begin() + i);
-			this->_pollfds.erase(this->_pollfds.begin() + i);
-			delete poll_element;
-			if (i <= this->_polli)
-				this->_polli--;
-			break;
 		}
 	}
 }

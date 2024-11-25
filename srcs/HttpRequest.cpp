@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 18:10:22 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 21:32:02 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ bool	HttpRequest::isDone(void) const {
 }
 
 bool	HttpRequest::isHeaderDone(void) const {
-	return (this->getState() == DONE || this->getState() == BODY || this->getState() == INVALID);
+	return (this->getState() == DONE || this->getState() == BODY || this->getState() == INVALID || this->getState() == URI_TOO_LONG);
 }
 
 void	HttpRequest::update(char *buffer, size_t size) {
@@ -121,6 +121,8 @@ void	HttpRequest::update(char *buffer, size_t size) {
 			return ;
 		}
 	}
+	if (this->_buffer.size() > this->_config.getClientMaxHeaderSize())
+		this->setState(this->_state == REQUEST_LINE ? URI_TOO_LONG : INVALID);
 }
 
 std::string &HttpRequest::getBodyBuffer(void) {
