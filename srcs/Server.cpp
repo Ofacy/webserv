@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:20:50 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 21:32:03 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,9 @@ Server::Server(const Server &src) : InheritedParameters(src) {
 }
 
 Server::Server(const Attribute &root) : InheritedParameters() {
-	std::vector<std::string> mandatory_childs(3);
-	mandatory_childs[0] = "server_name";
-	mandatory_childs[1] = "location";
-	mandatory_childs[2] = "listen";
+	std::vector<std::string> mandatory_childs(2);
+	mandatory_childs[0] = "location";
+	mandatory_childs[1] = "listen";
 	this->parse(root, mandatory_childs);
 	if (this->_locations.find("/") == this->_locations.end())
 		throw std::runtime_error("No root location defined in server");

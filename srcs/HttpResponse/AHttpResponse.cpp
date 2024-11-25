@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 21:32:05 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,24 @@ std::string AHttpResponse::getReasonPhrase(uint16_t code) const {
 	switch(code) {
 		case 200:
 			return "OK";
+			break;
+		case 201:
+			return "Created";
+			break;
+		case 301:
+			return "Moved Permanently";
+			break;
+		case 302:
+			return "Found";
+			break;
+		case 303:
+			return "See Other";
+			break;
+		case 304:
+			return "Not Modified";
+			break;
+		case 307:
+			return "Temporary Redirect";
 			break;
 		case 400:
 			return "Bad Request";

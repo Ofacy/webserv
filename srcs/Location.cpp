@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 16:25:45 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 17:20:03 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@ Location::Location(const Location &src) : InheritedParameters(src) {
 
 Location::Location(const Attribute &root, const InheritedParameters &inherited) : InheritedParameters(inherited) {
 	this->_path = root.getParameters(1)[0];
-	this->parse(root, std::vector<std::string>(1, "root"));
+	this->parse(root, std::vector<std::string>());
+	if (this->_root.empty() && this->getReturn().first == 0)
+		throw std::runtime_error("No root or return defined in location");
 }
 
 Location::~Location(void) {}
