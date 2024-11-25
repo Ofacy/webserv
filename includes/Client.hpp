@@ -40,8 +40,13 @@ public:
 	Client &operator=(const Client &rhs);
 	~Client();
 
-	int		getFd() const;
-	short	getEvents() const;
+	int					getFd() const;
+	short				getEvents() const;
+	std::string			getIp() const;
+	State				getState() const;
+	const HttpRequest	&getRequest() const;
+	const AHttpResponse	*getResponse() const;
+
 	int		update(struct pollfd &pollfd, Configuration &config);
 
 private:

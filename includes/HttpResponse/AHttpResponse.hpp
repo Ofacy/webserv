@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 16:38:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/18 20:38:54 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ public:
 	AHttpResponse &operator=(const AHttpResponse &rhs);
 	AHttpResponse &operator<<(const std::string &str);
 
+	uint16_t				getStatus() const;
+	size_t					getContentLength() const;
 	virtual IPollElement	*getPollElement();
 	virtual int				writeResponse(int fd);
 protected:
@@ -35,6 +37,7 @@ protected:
 	void			setBufferDone(bool done);
 	bool			isBufferDone() const;
 	bool			isHeaderReady() const;
+
 
 	void			createHeaderBuffer(uint16_t code, const std::map<std::string, std::string> &headers);
 	std::string		getReasonPhrase(uint16_t code) const;
@@ -45,6 +48,9 @@ private:
 	std::string		_write_buffer;
 	bool			_buffer_done;
 	bool			_header_ready;
+	
+	uint16_t		_status;
+	size_t			_content_length;
 	
 };
 

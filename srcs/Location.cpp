@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 16:25:45 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/16 14:48:05 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:20:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ const std::string	&Location::getPath(void) const {
 
 AHttpResponse * Location::getResponse(HttpRequest & request) const
 {
-	std::cout << "Location: " << this->_path << std::endl;
 	if (request.getUri().find("..") != std::string::npos)
 		return (this->getErrorResponse(request, 400, this->_root));
 	std::string path = request.getUri().substr(this->_path.size());

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   AHttpResponse.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/20 19:43:10 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:20:04 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,10 @@
 #include <iostream>
 #include "AHttpResponse.hpp"
 
-
 AHttpResponse::~AHttpResponse() {
 }
 
-AHttpResponse::AHttpResponse(HttpRequest &request) : _request(request), _buffer_done(false), _header_ready(false) {}
+AHttpResponse::AHttpResponse(HttpRequest &request) : _request(request), _buffer_done(false), _header_ready(false), _status(0), _content_length(0) {}
 
 AHttpResponse::AHttpResponse(const AHttpResponse &src) : _request(src._request) {
 	*this = src;
@@ -30,6 +29,8 @@ AHttpResponse &AHttpResponse::operator=(const AHttpResponse &rhs) {
 	this->_write_buffer = rhs._write_buffer;
 	this->_buffer_done = rhs._buffer_done;
 	this->_header_ready = rhs._header_ready;
+	this->_status = rhs._status;
+	this->_content_length = rhs._content_length;
 	return (*this);
 }
 
@@ -51,7 +52,7 @@ int AHttpResponse::writeResponse(int fd) {
 	if (ret == -1) {
 		return (-1);
 	}
-	//std::cout << "Sent " << ret << " bytes" << std::endl;
+	this->_content_length += ret;
 	this->_write_buffer.erase(0, ret);
 	return ((this->isBufferDone() && this->_write_buffer.empty()) ? 0 : 1);
 }
@@ -73,6 +74,14 @@ bool AHttpResponse::isHeaderReady() const
 	return _header_ready;
 }
 
+uint16_t AHttpResponse::getStatus() const {
+	return this->_status;
+}
+
+size_t AHttpResponse::getContentLength() const {
+	return this->_content_length;
+}
+
 void	AHttpResponse::createHeaderBuffer(uint16_t code, const std::map<std::string, std::string> &headers){
 	std::stringstream ss;
 	ss << "HTTP/1.1 " << code << " " << this->getReasonPhrase(code) << "\r\n";
@@ -82,8 +91,7 @@ void	AHttpResponse::createHeaderBuffer(uint16_t code, const std::map<std::string
 	header += "\r\n";
 	this->_write_buffer = header;
 	this->_header_ready = true;
-
-	std::cout << "Responding with: " << code << " " << this->getReasonPhrase(code) << std::endl;
+	this->_status = code;
 }
 
 std::string AHttpResponse::getReasonPhrase(uint16_t code) const {

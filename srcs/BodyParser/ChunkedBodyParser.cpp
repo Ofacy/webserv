@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 16:01:10 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/22 21:40:31 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:20:04 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ ChunkedBodyParser::ChunkedBodyParser(HttpRequest &request) : BodyParser(request)
 	std::stringstream ss;
 	ss << "/tmp/" << std::clock() << ".webserv";
 	this->_filename = ss.str();
-	std::cout << "Creating file " << this->_filename << std::endl;
 	this->_fd = open(this->_filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_NONBLOCK, S_IRUSR | S_IWUSR);
 	if (this->_fd == -1)
 		throw std::runtime_error("Failed to open file");
@@ -109,7 +108,6 @@ void ChunkedBodyParser::_writeFile(struct pollfd &pollfd) {
 			this->_invalidate();
 			return ;
 		}
-		std::cout << "Chunked body fully parsed" << std::endl;
 		this->getRequest().setState(HttpRequest::BODY);
 		pollfd.fd = this->_fd;
 		pollfd.events = this->getEvents();
@@ -175,7 +173,6 @@ int ChunkedBodyParser::_readChunkEnd() {
 	this->_buffer.erase(0, 2);
 	if (this->_chunk_size == 0) {
 		this->_state = WRITE_RESPONSE;
-		std::cout << "Chunked body fully parsed" << std::endl;
 		return 1;
 	}
 	this->_chunk_size = 0;

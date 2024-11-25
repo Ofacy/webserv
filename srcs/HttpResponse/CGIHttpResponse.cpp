@@ -87,7 +87,6 @@ int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 		this->_finish(pollfd);
 		return 1;
 	}
-	//std::cout << "Read from cgi: " << ret << " bytes" << std::endl;
 	if (!this->isHeaderReady())
 	{
 		this->_read_buffer.append(buffer, ret);
@@ -124,7 +123,6 @@ int CGIHttpResponse::_writeCGI(struct pollfd &pollfd) {
 	if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty())
 	{
 		pollfd.events = POLLIN;
-		std::cout << "Request body sent to cgi" << std::endl;
 	}
 	return (1);
 }
@@ -224,7 +222,6 @@ void	CGIHttpResponse::_parseHeaderLine(struct pollfd &pollfd, std::string &line)
 	if (value_pos == std::string::npos)
 		value_pos = 0;
 	std::string value = line.substr(value_pos);
-	std::cout << "Header : " << key << ": " << value << std::endl;
 	this->_cgi_headers[key] = value;
 }
 
@@ -232,7 +229,6 @@ int	CGIHttpResponse::_waitFork() {
 	int status;
 	waitpid(this->_pid, &status, 0);
 	this->_pid = -1;
-	std::cout << "Child exited with status " << WEXITSTATUS(status) << " and signal " << WSTOPSIG(status) << std::endl;
 	return status;
 }
 

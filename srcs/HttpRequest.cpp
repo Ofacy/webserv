@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:39:50 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/23 16:02:32 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,6 @@ void	HttpRequest::_parseLine(std::string &line) {
 		this->_parseRequestLine(line);
 	else if (this->getState() == HEADERS)
 	{
-		std::cout << "Header line: " << line << std::endl;
 		if (line.empty())
 		{
 			this->setState(this->hasBody() ? BODY : DONE);
@@ -150,7 +149,6 @@ void	HttpRequest::_parseLine(std::string &line) {
 // Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
 
 void	HttpRequest::_parseRequestLine(std::string &line) {
-	std::cout << "Request line: " << line << std::endl;
 	if (line.find("\r") != std::string::npos || line.find("\n") != std::string::npos) {
 		this->setState(INVALID);
 		return ;
@@ -170,11 +168,6 @@ void	HttpRequest::_parseRequestLine(std::string &line) {
 		this->setState(INVALID);
 		return ;
 	}
-	std::cout << "========== " << std::endl;
-	std::cout << "Method: " << this->_method << std::endl;
-	std::cout << "URI: " << this->_uri << std::endl;
-	std::cout << "Version: " << this->_version << std::endl;
-	std::cout << "========== " << std::endl;
 	this->setState(HEADERS);
 	if (this->_version != "HTTP/1.1") {
 		this->setState(INVALID);
@@ -208,22 +201,14 @@ void	HttpRequest::_parseHeaderLine(std::string &line) {
 	if (value_pos == std::string::npos)
 		value_pos = 0;
 	std::string value = line.substr(value_pos);
-	//std::cout << "Header : " << key << ": " << value << std::endl;
 	this->setHeader(key, value);
 }
 
-BodyParser * HttpRequest::_selectBodyParser(void)
-{
+BodyParser * HttpRequest::_selectBodyParser(void) {
 	if (this->getHeader("Transfer-Encoding") == "chunked")
-	{
-		std::cout << "Using chunked body parser" << std::endl;
 		return new ChunkedBodyParser(*this);
-	}
 	else if (!this->getHeader("Content-Length").empty())
-	{
-		std::cout << "Using content-length body parser" << std::endl;
 		return new BodyParser(*this);
-	}
 	return NULL;
 }
 
