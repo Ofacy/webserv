@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 17:20:03 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 19:12:55 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,20 +168,13 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 	if (S_ISDIR(buffer.st_mode)) {
 		return (this->_getDirectoryResponse(request, path, root));
 	}
-	else {
-		std::map<std::string, std::string>::const_iterator it = this->_cgi_paths.begin();
-		for (; it != this->_cgi_paths.end(); it++) {
-			if (uri.size() > it->first.size() && uri.find(it->first, uri.size() - it->first.size()) != std::string::npos)
-				break ;
-		}
-		if (it != this->_cgi_paths.end())
-			return (new CGIHttpResponse(request, root + uri, it->second));
-		int fd = open(path.c_str(), O_RDONLY);
-		if (fd == -1)
-			return (this->getErrorResponse(request, 404, root));
-		return (new FileHttpResponse(request, 200, fd, buffer));
-	}
-	return (NULL);
+	AHttpResponse *response = this->_getCGIResponse(request, path);
+	if (response)
+		return (response);
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd == -1)
+		return (this->getErrorResponse(request, 404, root));
+	return (new FileHttpResponse(request, 200, fd, buffer));
 }
 
 AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const uint16_t status_code, const std::string & root) const
@@ -195,6 +188,9 @@ AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const
 		return (new StatusHttpResponse(request, status_code));
 	if (S_ISDIR(buffer.st_mode))
 		return (this->_getDirectoryResponse(request, path, root));
+	AHttpResponse *response = this->_getCGIResponse(request, path);
+	if (response)
+		return (response);
 	int fd = open(path.c_str(), O_RDONLY);
 	if (fd == -1)
 		return (new StatusHttpResponse(request, status_code));
@@ -214,6 +210,9 @@ AHttpResponse *InheritedParameters::_getDirectoryResponse(HttpRequest &request, 
 		if (stat(index_path.c_str(), &buffer) == -1)
 			continue ;
 		if (S_ISREG(buffer.st_mode)) {
+			AHttpResponse *response = this->_getCGIResponse(request, index_path);
+			if (response)
+				return (response);
 			int fd = open(index_path.c_str(), O_RDONLY);
 			if (fd == -1)
 				continue ;
@@ -223,4 +222,15 @@ AHttpResponse *InheritedParameters::_getDirectoryResponse(HttpRequest &request, 
 	if (this->_autoindex)
 		return (new DirHttpResponse(request, 200, path));
 	return (this->getErrorResponse(request, 404, root));
+}
+
+AHttpResponse	*InheritedParameters::_getCGIResponse(HttpRequest &request, const std::string &path) const {
+	std::map<std::string, std::string>::const_iterator it = this->_cgi_paths.begin();
+	for (; it != this->_cgi_paths.end(); it++) {
+		if (path.size() > it->first.size() && path.find(it->first, path.size() - it->first.size()) != std::string::npos)
+			break ;
+	}
+	if (it != this->_cgi_paths.end())
+		return (new CGIHttpResponse(request, path, it->second));
+	return (NULL);
 }
