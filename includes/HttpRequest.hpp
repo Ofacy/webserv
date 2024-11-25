@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 21:35:52 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/20 19:47:19 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/25 21:32:05 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ class HttpRequest : public HttpMessage {
 			PARSING_BODY,
 			BODY,
 			DONE,
-			INVALID
+			INVALID,
+			URI_TOO_LONG
 		};
 		HttpRequest(Configuration &config);
 		HttpRequest(const HttpRequest &src);

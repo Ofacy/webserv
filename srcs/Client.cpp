@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 14:03:43 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 21:32:01 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,7 @@
 
 #include "StatusHttpResponse.hpp"
 
-Client::Client(Bind &bind, int fd, struct sockaddr_in addr, Configuration &config) : _config(config), _state(READ), _bind(bind), _fd(fd), _addr(addr), _request(config), _response(NULL)
-{
-	//std::cout << "Client " << fd << " created" << std::endl;
-}
+Client::Client(Bind &bind, int fd, struct sockaddr_in addr, Configuration &config) : _config(config), _state(READ), _bind(bind), _fd(fd), _addr(addr), _request(config), _response(NULL) {}
 
 Client::Client(const Client &src) : _config(src._config), _bind(src._bind), _request(src._config), _response(NULL)
 {
@@ -101,10 +98,8 @@ int	Client::update(struct pollfd &pollfd, Configuration &config) {
 			this->_cleanResponse(config);
 			return (-1);
 		}
-		//std::cout << "Client " << this->_fd << " is ready to write" << std::endl;
 	}
 	if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {
-		//std::cout << "Client " << this->_fd << " disconnected" << std::endl;
 		this->_cleanResponse(config);
 		return (-1);
 	}
@@ -112,6 +107,8 @@ int	Client::update(struct pollfd &pollfd, Configuration &config) {
 		try {
 			if (this->_request.getState() == HttpRequest::INVALID)
 				this->_response = new StatusHttpResponse(this->_request, 400);
+			else if (this->_request.getState() == HttpRequest::URI_TOO_LONG)
+				this->_response = new StatusHttpResponse(this->_request, 414);
 			else
 				this->_response = this->_bind.getResponse(this->_request, config);
 		}
