@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/23 15:28:37 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:20:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ bool	InheritedParameters::parseAttribute(const Attribute &child) {
 	else if (child.getName() == "index") {
 		this->assertNotAlreadyDefined("index");
 		this->_index = child.getParameters();
-		//std::cout << "Index size: " << this->_index.size() << std::endl;
 		return (true);
 	}
 	else if (child.getName() == "error_page") {
@@ -175,10 +174,8 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 			if (uri.size() > it->first.size() && uri.find(it->first, uri.size() - it->first.size()) != std::string::npos)
 				break ;
 		}
-		if (it != this->_cgi_paths.end()) {
-			std::cout << "Found CGI path " << it->second << std::endl;
+		if (it != this->_cgi_paths.end())
 			return (new CGIHttpResponse(request, root + uri, it->second));
-		}
 		int fd = open(path.c_str(), O_RDONLY);
 		if (fd == -1)
 			return (this->getErrorResponse(request, 404, root));
@@ -194,8 +191,6 @@ AHttpResponse *InheritedParameters::getErrorResponse(HttpRequest &request, const
 		return (new StatusHttpResponse(request, status_code));
 	struct stat buffer;
 	std::string path = root + it->second;
-
-	//std::cout << "Error page path: " << path << std::endl;
 	if (stat(path.c_str(), &buffer) == -1)
 		return (new StatusHttpResponse(request, status_code));
 	if (S_ISDIR(buffer.st_mode))

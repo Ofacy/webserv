@@ -3,21 +3,21 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+         #
+#    By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/11/22 16:27:44 by bwisniew         ###   ########.fr        #
+#    Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
 CXX = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -MMD -MP -O3
+CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -MMD -MP -g3
 
 SRCS_DIR = srcs
 
 SRCS =	main.cpp Configuration.cpp Server.cpp Location.cpp Bind.cpp Client.cpp signal.cpp HttpRequest.cpp \
-		HttpMessage.cpp InheritedParameters.cpp 
+		HttpMessage.cpp InheritedParameters.cpp AccessLog.cpp
 
 
 CONFIG_SRCS = Parser.cpp

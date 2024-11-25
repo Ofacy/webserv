@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 12:56:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/10/10 16:35:48 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ const Token &Lexer::peekToken(void) const {
 
 void Lexer::_tokenize(void) {
 	std::string str_tok;
-	while (!this->_file.eof()) {
+	while (!this->_file.eof() && !this->_file.fail()) {
 		str_tok.clear();
 		this->_file >> str_tok;
 		std::string word;
@@ -72,6 +72,8 @@ void Lexer::_tokenize(void) {
 		if (!word.empty())
 			this->_tokens.push_back(Token(WORD, word));
 	}
+	if (this->_file.fail())
+		throw std::runtime_error("Failed to read file");
 }
 
 TokenType	Lexer::_getTokenType(char c) const {

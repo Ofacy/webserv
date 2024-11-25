@@ -6,10 +6,11 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:09:24 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/22 23:03:17 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:20:00 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "AccessLog.hpp"
 #include "Configuration.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
@@ -33,8 +34,8 @@ Configuration::Configuration(const std::string &config_path) {
 	}
 	Lexer lexer(file);
 	Parser parser(lexer);
-	std::cout << parser << std::endl;
 	this->parse(parser.getRoot(), std::vector<std::string>());
+	this->addPollElement(AccessLog::getInstance());
 	this->_poll();
 }
 
@@ -55,10 +56,11 @@ Configuration &Configuration::operator=(const Configuration &rhs) {
 void	Configuration::addPollElement(IPollElement *poll_element) {
 	struct pollfd pollfd;
 
+	if (!poll_element)
+		return ;
 	pollfd.fd = poll_element->getFd();
 	pollfd.events = poll_element->getEvents();
 	pollfd.revents = 0;
-	//std::cout << "Adding poll element with fd = " << pollfd.fd << std::endl;
 	this->_poll_elements.push_back(poll_element);
 	this->_pollfds.push_back(pollfd);
 }
@@ -66,9 +68,12 @@ void	Configuration::addPollElement(IPollElement *poll_element) {
 bool	Configuration::parseAttribute(const Attribute &child) {
 	if (InheritedParameters::parseAttribute(child))
 		return (true);
-	if (child.getName() == "server")
-	{
+	if (child.getName() == "server") {
 		this->_assignServer(child);
+		return (true);
+	}
+	if (child.getName() == "access_log") {
+		AccessLog::getInstance(child.getParameters(1)[0]);
 		return (true);
 	}
 	return (false);
@@ -100,8 +105,6 @@ Bind	&Configuration::_getBind(const Server &server) {
 }
 
 void Configuration::_poll() {
-	// std::cout << "Poll elements: " << this->_poll_elements.size() << std::endl;
-	// std::cout << "Poll fds: " << this->_pollfds.size() << std::endl;
 	while (!Configuration::_exit) {
 		if (::poll(&this->_pollfds[0], this->_pollfds.size(), -1) == -1)
 		{
@@ -114,8 +117,6 @@ void Configuration::_poll() {
 			struct pollfd pollfd = this->_pollfds[this->_polli];
 			if (poll_element->update(pollfd, *this) <= 0)
 			{
-				// std::cout << "Removing poll element with fd = " << poll_element->getFd() << std::endl;
-				// std::cout << "poll_elements size = " << this->_poll_elements.size() << std::endl;
 				this->_poll_elements.erase(this->_poll_elements.begin() + this->_polli);
 				this->_pollfds.erase(this->_pollfds.begin() + this->_polli);
 				this->_polli--;
@@ -129,8 +130,6 @@ void Configuration::_poll() {
 
 void	Configuration::removePollElement(IPollElement *poll_element)
 {
-	//std::cout << "Removing poll element with fd = " << poll_element->getFd() << std::endl;
-	//std::cout << "poll_elements size = " << this->_poll_elements.size() << std::endl;
 	for (size_t i = 0; i < this->_poll_elements.size(); i++) {
 		if (this->_poll_elements[i] == poll_element) {
 			this->_poll_elements.erase(this->_poll_elements.begin() + i);

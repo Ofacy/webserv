@@ -13,3 +13,4 @@ upper_cgi
 valgrind.log
 rockyou.txt
 en.subject.pdf
+*.log

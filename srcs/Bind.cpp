@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:19 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/23 00:23:51 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 17:20:06 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ Bind::Bind(const Bind &src) {
 Bind::Bind(const std::string &host, int port) : _port(port), _host(host), _fd(-1) {
 	struct sockaddr_in addr;
 	this->_fd = socket(AF_INET, SOCK_STREAM, 0);
-	// std::cout << "bind fd: " << this->_fd << std::endl;
 	if (this->_fd == -1)
 		throw std::runtime_error("Failed to create socket: " + std::string(std::strerror(errno)));
 	int opt = 1;
@@ -107,7 +106,6 @@ uint32_t Bind::_getHost(void) const {
 			count++;
 		}
 	}
-	// std::cout << "host: " << htonl(host) << std::endl;
 	return (htonl(host));
 }
 
@@ -123,7 +121,6 @@ short Bind::getEvents() const {
 int	Bind::update(struct pollfd &pollfd, Configuration &config) {
 	if ((pollfd.revents & POLLHUP) == POLLHUP)
 	{
-		// std::cout << "Bind update " << pollfd.revents << std::endl;
 		this->listen();
 	}
 	if ((pollfd.revents & POLLIN) == POLLIN) {

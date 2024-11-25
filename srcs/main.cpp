@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 10:46:31 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/20 19:43:10 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 void	setup_signal();
 
 int main(int argc, char **argv) {
-	std::string config_path = "default.conf";
+	std::string config_path = "config/default.conf";
 
 	if (argc > 2) {
 		std::cerr << argv[0] << " [configfile]" << std::endl;
@@ -29,6 +29,12 @@ int main(int argc, char **argv) {
 		config_path = argv[1];
 	}
 	setup_signal();
-	Configuration config(config_path);
+	try {
+		Configuration config(config_path);
+	}
+	catch(std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return (1);
+	}
 	return (0);
 }
