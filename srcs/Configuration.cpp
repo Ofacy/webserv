@@ -21,7 +21,6 @@
 bool Configuration::_exit = false;
 
 Configuration::Configuration(void) : InheritedParameters(), _client_max_header_size(DEFAULT_MAX_HEADER_SIZE) {
-	this->_poll();
 };
 
 Configuration::Configuration(const Configuration &src) : InheritedParameters(src), _client_max_header_size(DEFAULT_MAX_HEADER_SIZE) {
@@ -31,14 +30,22 @@ Configuration::Configuration(const Configuration &src) : InheritedParameters(src
 Configuration::Configuration(const std::string &config_path) : InheritedParameters(), _client_max_header_size(DEFAULT_MAX_HEADER_SIZE) {
 	std::ifstream file(config_path.c_str());
 
-	if (!file.is_open()) {
-		throw std::runtime_error(std::string("Failed to open file '") + config_path + "': " + std::strerror(errno));
+	try {
+		if (!file.is_open()) {
+			throw std::runtime_error(std::string("Failed to open file '") + config_path + "': " + std::strerror(errno));
+		}
+		Lexer lexer(file);
+		Parser parser(lexer);
+		this->parse(parser.getRoot(), std::vector<std::string>(1, "server"));
 	}
-	Lexer lexer(file);
-	Parser parser(lexer);
-	this->parse(parser.getRoot(), std::vector<std::string>(1, "server"));
+	catch (std::exception &except) {
+		std::cerr << except.what() << std::endl;
+		if (AccessLog::getInstance())
+			delete AccessLog::getInstance();
+		this->exit();
+		return ;
+	}
 	this->addPollElement(AccessLog::getInstance());
-	this->_poll();
 }
 
 Configuration::~Configuration(void) {
@@ -131,7 +138,7 @@ Bind	&Configuration::_getBind(const Server &server) {
 	return (*this->_binds.back());
 }
 
-void Configuration::_poll() {
+void Configuration::start() {
 	while (!Configuration::_exit) {
 		if (::poll(&this->_pollfds[0], this->_pollfds.size(), -1) == -1)
 		{

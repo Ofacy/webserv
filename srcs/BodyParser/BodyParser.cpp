@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   BodyParser.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:57:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/20 19:21:39 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:59:26 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@ BodyParser::BodyParser(HttpRequest &request) : _request(request), _current_body_
 	char *endptr;
 	size_t content_length;
 	content_length = std::strtoul(this->getRequest().getHeader("Content-Length").c_str(), &endptr, 10);
-	if (*endptr != '\0' || errno == ERANGE)
-	{
+	if (*endptr != '\0' || errno == ERANGE) {
 		throw std::runtime_error("Invalid Content-Length header");
 	}
 	this->getRequest().setContentLength(content_length);
@@ -43,15 +42,13 @@ IPollElement *BodyParser::getPollElement() {
 }
 
 void	BodyParser::update(const char *data, size_t len) {
-	if (this->_current_body_size + len > this->_request.getContentLength())
-	{
+	if (this->_current_body_size + len > this->_request.getContentLength()) {
 		this->_request.setState(HttpRequest::INVALID);
 		return ;
 	}
 	this->_request.getBodyBuffer().append(data, len);
 	this->_current_body_size += len;
-	if (this->_current_body_size == this->_request.getContentLength())
-	{
+	if (this->_current_body_size == this->_request.getContentLength()) {
 		this->_request.setState(HttpRequest::DONE);
 	}
 }

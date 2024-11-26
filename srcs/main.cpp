@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 10:46:31 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 17:59:26 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
 	setup_signal();
 	try {
 		Configuration config(config_path);
+		config.start();
 	}
 	catch(std::exception &e) {
 		std::cerr << e.what() << std::endl;
