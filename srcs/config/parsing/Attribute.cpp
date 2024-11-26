@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Attribute.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 13:55:08 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 17:44:57 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:59:26 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,7 @@ const std::vector<std::string> &Attribute::getParameters(void) const {
 }
 
 const std::vector<std::string> &Attribute::getParameters(size_t assert_count) const {
-	if (this->_parameters.size() != assert_count)
-	{
+	if (this->_parameters.size() != assert_count) {
 		std::stringstream ss;
 		ss << "Attribute '" << this->_name << "' must have " << assert_count << " parameters";
 		throw std::runtime_error(ss.str());

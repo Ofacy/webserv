@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:08:06 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 21:32:06 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 17:59:26 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,12 @@ class Configuration : public InheritedParameters {
 		size_t			getClientMaxHeaderSize(void) const;
 		static 			void	exit();
 
+		void			start();
 	private:
 		bool						parseAttribute(const Attribute &child);
 		void						_assignServer(const Attribute &server_attribute);
 		Bind						&_getBind(const Server &server);
 
-		void						_poll();
 		std::vector<struct pollfd>	_pollfds;
 		std::vector<IPollElement *>	_poll_elements;
 		std::vector<Bind *>			_binds;

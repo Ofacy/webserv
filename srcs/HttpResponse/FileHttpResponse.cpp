@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 18:28:08 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/23 15:15:11 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 17:59:26 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,16 @@
 
 FileHttpResponse::FileHttpResponse(HttpRequest &request, uint16_t status, int fd, struct stat stats) : AHttpResponse(request), _fd(fd)
 {
-	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1)
+	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1) {
+		this->~FileHttpResponse();
 		throw std::runtime_error("Failed to set file descriptor to non-blocking: " + std::string(std::strerror(errno)));
+	}
 	std::map<std::string, std::string> headers;
 	std::stringstream ss;
 	ss << stats.st_size;
 	headers["Content-Length"] = ss.str();
 	this->createHeaderBuffer(status, headers);
-	if (request.getMethod() == "HEAD")
-	{
+	if (request.getMethod() == "HEAD") {
 		this->setBufferDone(true);
 		close(this->_fd);
 		this->_fd = -1;

@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:19 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 17:52:46 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,17 @@ Bind::Bind(const std::string &host, int port) : _port(port), _host(host), _fd(-1
 	if (this->_fd == -1)
 		throw std::runtime_error("Failed to create socket: " + std::string(std::strerror(errno)));
 	int opt = 1;
-	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) == -1)
+	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) == -1) {
+		this->~Bind();
 		throw std::runtime_error("Failed to set socket options: " + std::string(std::strerror(errno)));
+	}
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = _getHost(this->_host);
-	if (bind(this->_fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+	if (bind(this->_fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+		this->~Bind();
 		throw std::runtime_error("Failed to bind socket: " + std::string(std::strerror(errno)));
+	}
 }
 
 Bind::~Bind(void) {
@@ -77,12 +81,26 @@ Client *Bind::accept(Configuration &config) {
 	int fd = ::accept(this->_fd, (struct sockaddr *)&addr, &addr_len);
 	if (fd == -1)
 		return (NULL);
-	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
+		close(fd);
 		throw std::runtime_error("Failed to set socket to non-blocking: " + std::string(std::strerror(errno)));
+	}
 	return (new Client(*this, fd, addr, config));
 }
 
 void Bind::push_server(const Server &server) {
+	if (server.hasName()) {
+		for (std::vector<Server>::iterator it = this->_servers.begin(); it != this->_servers.end(); it++) {
+			if (it->hasName(server.getServerNames()[0]))
+				throw std::runtime_error("Server with name " + server.getServerNames()[0] + " already exists for this host and port");
+		}
+	}
+	else {
+		for (std::vector<Server>::iterator it = this->_servers.begin(); it != this->_servers.end(); it++) {
+			if (!server.hasName())
+				throw std::runtime_error("Server without name already exists for this host and port");
+		}
+	}
 	_servers.push_back(server);
 }
 
@@ -117,8 +135,7 @@ short Bind::getEvents() const {
 }
 
 int	Bind::update(struct pollfd &pollfd, Configuration &config) {
-	if ((pollfd.revents & POLLHUP) == POLLHUP)
-	{
+	if ((pollfd.revents & POLLHUP) == POLLHUP) {
 		this->listen();
 	}
 	if ((pollfd.revents & POLLIN) == POLLIN) {
@@ -131,9 +148,12 @@ int	Bind::update(struct pollfd &pollfd, Configuration &config) {
 
 AHttpResponse *Bind::getResponse(HttpRequest & request, Configuration &config)
 {
-	for (std::vector<Server>::reverse_iterator it = this->_servers.rbegin(); it != this->_servers.rend(); it++)
-	{
+	for (std::vector<Server>::reverse_iterator it = this->_servers.rbegin(); it != this->_servers.rend(); it++) {
 		if (it->hasName(request.getHeader("Host")))
+			return (it->getResponse(request));
+	}
+	for (std::vector<Server>::reverse_iterator it = this->_servers.rbegin(); it != this->_servers.rend(); it++) {
+		if (!it->hasName())
 			return (it->getResponse(request));
 	}
 	return (config.getErrorResponse(request, 404));

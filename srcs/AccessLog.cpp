@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:31:16 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 17:06:50 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ AccessLog::AccessLog(const std::string &path) : _fd(open(path.c_str(), O_CREAT |
 AccessLog::~AccessLog() {
 	if (_fd != -1)
 		close(_fd);
+	AccessLog::_instance = NULL;
 }
 
 AccessLog *&AccessLog::getInstance(const std::string &path) {

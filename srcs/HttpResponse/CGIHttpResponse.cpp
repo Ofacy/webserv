@@ -138,6 +138,8 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 		throw std::runtime_error("Failed to create socket pair: " + std::string(std::strerror(errno)));
 	this->_pid = fork();
 	if (this->_pid == -1) {
+		close(socket_pair[SOCKET_PARENT]);
+		close(socket_pair[SOCKET_CHILD]);
 		throw std::runtime_error("Failed to fork: " + std::string(std::strerror(errno)));
 	}
 	else if (this->_pid == 0) {
@@ -172,7 +174,10 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 	close(socket_pair[SOCKET_CHILD]);
 	this->_fd = socket_pair[SOCKET_PARENT];
 	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1)
+	{
+		this->~CGIHttpResponse();
 		throw std::runtime_error("Failed to set socket to non-blocking: " + std::string(std::strerror(errno)));
+	}
 }
 
 std::vector<std::string>	CGIHttpResponse::_generateForkEnv(const std::string &script_path) {

@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:20:50 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 17:59:26 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ Server::Server(const Attribute &root) : InheritedParameters() {
 	std::vector<std::string> mandatory_childs(2);
 	mandatory_childs[0] = "location";
 	mandatory_childs[1] = "listen";
+	if (root.getParameters().size() != 0)
+		throw std::runtime_error("Server should not have parameters");
 	this->parse(root, mandatory_childs);
 	if (this->_locations.find("/") == this->_locations.end())
 		throw std::runtime_error("No root location defined in server");
@@ -47,16 +49,22 @@ int	Server::getPort() const {
 	return (this->_port);
 }
 
-bool Server::hasName(const std::string & name) const
+bool Server::hasName() const {
+	return (!_server_names.empty());
+}
+
+bool Server::hasName(const std::string &name) const
 {
-	if (_server_names.empty())
-		return (true);
 	for (std::vector<std::string>::const_iterator it = _server_names.begin(); it != _server_names.end(); it++)
 	{
 		if (*it == name)
 			return (true);
 	}
 	return (false);
+}
+
+const std::vector<std::string> &Server::getServerNames() const {
+	return (_server_names);
 }
 
 AHttpResponse *Server::getResponse(HttpRequest & request) const

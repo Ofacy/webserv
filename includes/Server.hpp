@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 11:10:53 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/13 18:21:20 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:16:32 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,11 @@ class Server : public InheritedParameters {
 		const std::string	getHost() const;
 		int					getPort() const;
 
+		bool				hasName() const;
 		bool				hasName(const std::string &name) const;
-		
-		AHttpResponse		*getResponse(HttpRequest &request) const;
+
+		const std::vector<std::string>	&getServerNames() const;
+		AHttpResponse					*getResponse(HttpRequest &request) const;
 	private:
 		bool	parseAttribute(const Attribute &child);
 		

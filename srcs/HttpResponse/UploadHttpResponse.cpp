@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 14:56:41 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/26 13:20:02 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 17:59:26 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,10 @@ UploadHttpResponse::UploadHttpResponse(HttpRequest &request, const std::string &
 	this->_fd = open(path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (!this->_fd)
 		throw std::runtime_error("Failed to open file: " + std::string(std::strerror(errno)) + ": " + path);
-	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1)
+	if (fcntl(this->_fd, F_SETFL, O_NONBLOCK) == -1) {
+		this->~UploadHttpResponse();
 		throw std::runtime_error("Failed to set file descriptor to non-blocking: " + std::string(std::strerror(errno)));
+	}
 	this->createHeaderBuffer(201, std::map<std::string, std::string>());
 }
 
