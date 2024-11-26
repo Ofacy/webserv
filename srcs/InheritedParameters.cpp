@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 19:12:55 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 23:03:56 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,8 @@ InheritedParameters	&InheritedParameters::operator=(const InheritedParameters &r
 	this->_index = rhs._index;
 	this->_error_pages = rhs._error_pages;
 	this->_cgi_paths = rhs._cgi_paths;
+	this->_upload_folder = rhs._upload_folder;
+	this->_return = rhs._return;
 	return (*this);
 }
 
@@ -120,6 +122,27 @@ bool	InheritedParameters::parseAttribute(const Attribute &child) {
 		this->_upload_folder = child.getParameters(1)[0];
 		return (true);
 	}
+	else if (child.getName() == "return") {
+		std::vector<std::string> parameters = child.getParameters();
+		if (parameters.size() < 1)
+			throw std::runtime_error("return must have at least 1 parameters");
+		char *endPtr;
+		uint16_t status_code = std::strtol(parameters[0].c_str(), &endPtr, 10);
+		if (*endPtr != '\0' || status_code < 200 || status_code > 599)
+			throw std::runtime_error("Invalid status code in return");
+		if (parameters.size() < 2)
+			this->_return = std::make_pair(status_code, "");
+		else
+		{
+			std::stringstream ss;
+			for (size_t i = 1; i < parameters.size(); i++)
+			{
+				ss << parameters[i] << (i == parameters.size() - 1 ? "" : " ");
+			}
+			this->_return = std::make_pair(status_code, ss.str());
+		}
+		return (true);
+	}
 	return (false);
 }
 
@@ -148,7 +171,17 @@ const std::map<std::string, std::string>	&InheritedParameters::getCgiPaths(void)
 	return (this->_cgi_paths);
 }
 
+const std::pair<uint16_t, std::string>	&InheritedParameters::getReturn(void) const {
+	return (this->_return);
+}
+
 AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const std::string &root, const std::string &uri) const {
+	if (this->_return.first != 0)
+	{
+		if (this->_return.second.empty())
+			return (this->getErrorResponse(request, this->_return.first, root));
+		return (new StatusHttpResponse(request, this->_return.first, this->_return.second));
+	}
 	if (std::find(this->_allowed_methods.begin(), this->_allowed_methods.end(), request.getMethod()) == this->_allowed_methods.end())
 		return (this->getErrorResponse(request, 405, root));
 	if (request.getContentLength() > this->_max_body_size && this->_max_body_size != 0)
@@ -161,6 +194,15 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 		if (this->_upload_folder.empty())
 			path = root + uri;
 		return new UploadHttpResponse(request, path);
+	}
+	else if (request.getMethod() == "DELETE")
+	{
+		path = this->_upload_folder + uri;
+		if (this->_upload_folder.empty())
+			path = root + uri;
+		if (unlink(path.c_str()) == -1)
+			return (this->getErrorResponse(request, 404, root));
+		return (new StatusHttpResponse(request, 200));
 	}
 	struct stat buffer;
 	if (stat(path.c_str(), &buffer) == -1)

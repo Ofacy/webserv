@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:30:26 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 19:12:55 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,17 @@ class InheritedParameters : public AAttributeParser {
 		const std::vector<std::string>				&getIndex(void) const;
 		const std::map<uint16_t, std::string>		&getErrorPages(void) const;
 		const std::map<std::string, std::string>	&getCgiPaths(void) const;
+		const std::pair<uint16_t, std::string>		&getReturn(void) const;
 
 		AHttpResponse							*prepareResponse(HttpRequest &request, const std::string &root, const std::string &uri) const;
 		AHttpResponse							*getErrorResponse(HttpRequest &request, const uint16_t status_code, const std::string &root) const;
 		AHttpResponse							*getErrorResponse(HttpRequest &request, const uint16_t status_code) const;
-		const std::string						getErrorPage(HttpRequest &request, const uint16_t status_code, const std::string &root) const;
 	private:
 		AHttpResponse						*_getDirectoryResponse(HttpRequest &request, const std::string &path, const std::string &root) const;
 		AHttpResponse						*_getCGIResponse(HttpRequest &request, const std::string &path) const;
 		const static std::string			_supported_methods[NB_SUPPORTED_METHODS];
 
+		std::pair<uint16_t, std::string>	_return;
 		std::string							_upload_folder;
 		size_t								_max_body_size;
 		std::vector<std::string>			_allowed_methods;

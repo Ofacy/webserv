@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Bind.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bwisniew <bwisniew@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:38 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/20 19:50:48 by bwisniew         ###   ########.fr       */
+/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class Bind : public IPollElement {
 		Bind &operator=(const Bind &rhs);
 
 		const std::string	&getHost(void) const;
+		bool 				isHost(const std::string &host) const;
 		int					getPort(void) const;
 
 		void				listen(void);
@@ -44,7 +45,7 @@ class Bind : public IPollElement {
 
 		void				push_server(const Server &server);
 	private:
-		uint32_t			_getHost(void) const;
+		uint32_t			_getHost(const std::string &host) const;
 		std::vector<Server>	_servers;
 		int					_port;
 		std::string			_host;

@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 12:56:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <stdexcept>
 #include "Lexer.hpp"
 
-const std::string Lexer::_word_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:/.-";
+const std::string Lexer::_word_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:/.-!,";
 
 Lexer::Lexer(std::ifstream &file) : _file(file) {
 	this->_tokenize();

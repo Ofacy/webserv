@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 16:01:10 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 17:20:04 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 22:15:35 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,8 +97,11 @@ int	ChunkedBodyParser::update(struct pollfd &pollfd, Configuration &config) {
 
 void ChunkedBodyParser::_writeFile(struct pollfd &pollfd) {
 	ssize_t written = write(this->_fd, this->_file_buffer.c_str(), this->_file_buffer.size());
-	if (written == -1)
-		throw std::runtime_error(std::string("Failed to write to file") + std::strerror(errno));
+	if (written == -1) {
+		std::cerr << "Failed to write to Chunked body parser file" << std::endl;
+		this->_invalidate();
+		return ;
+	}
 	this->getRequest().setContentLength(this->getRequest().getContentLength() + written);
 	this->_file_buffer.erase(0, written);
 	if (this->_state == WRITE_RESPONSE && this->_file_buffer.empty()) {

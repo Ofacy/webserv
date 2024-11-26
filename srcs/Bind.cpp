@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 17:36:19 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 17:20:06 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ Bind::Bind(const std::string &host, int port) : _port(port), _host(host), _fd(-1
 		throw std::runtime_error("Failed to set socket options: " + std::string(std::strerror(errno)));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = _getHost();
+	addr.sin_addr.s_addr = _getHost(this->_host);
 	if (bind(this->_fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 		throw std::runtime_error("Failed to bind socket: " + std::string(std::strerror(errno)));
 }
@@ -57,8 +57,8 @@ Bind &Bind::operator=(const Bind &rhs) {
 	return (*this);
 }
 
-const std::string &Bind::getHost(void) const {
-	return (_host);
+bool Bind::isHost(const std::string &host) const {
+	return (this->_getHost(this->_host) == this->_getHost(host));
 }
 
 int Bind::getPort(void) const {
@@ -86,13 +86,12 @@ void Bind::push_server(const Server &server) {
 	_servers.push_back(server);
 }
 
-uint32_t Bind::_getHost(void) const {
+uint32_t Bind::_getHost(const std::string &host_str) const {
 	uint8_t	count = 0;
 	char	*endPtr;
 	
 	if (this->_host == "")
 		return INADDR_ANY;
-	std::string host_str = this->_host;
 	uint32_t host = std::strtoul(host_str.c_str(), &endPtr, 10);
 	if (*endPtr != '.' || host > 255 || errno == ERANGE)
 		throw std::runtime_error("Invalid host: " + this->_host);
@@ -108,7 +107,6 @@ uint32_t Bind::_getHost(void) const {
 	}
 	return (htonl(host));
 }
-
 
 int	Bind::getFd() const {
 	return (this->_fd);

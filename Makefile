@@ -6,7 +6,7 @@
 #    By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 13:24:31 by lcottet           #+#    #+#              #
-#    Updated: 2024/11/25 17:23:25 by lcottet          ###   ########lyon.fr    #
+#    Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr    #
 #                                                                              #
 # **************************************************************************** #
 
@@ -61,8 +61,7 @@ fclean: clean
 re: fclean $(NAME)
 
 valgrind: $(NAME)
-	valgrind --exit-on-first-error=yes --error-exitcode=42 --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=all --log-file=valgrind.log ./$(NAME) tester.conf
-
+	valgrind --exit-on-first-error=yes --error-exitcode=42 --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=all --log-file=valgrind.log ./$(NAME) config/tester.conf
 cgi: cgi/env_cgi cgi/upper_cgi
 
 cgi/env_cgi: cgi/env_cgi.cpp

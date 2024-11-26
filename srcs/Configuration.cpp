@@ -122,7 +122,7 @@ Bind	&Configuration::_getBind(const Server &server) {
 		port = std::atoi(port_str.c_str());
 	}
 	for (size_t i = 0; i < this->_binds.size(); i++) {
-		if (this->_binds[i]->getHost() == host && this->_binds[i]->getPort() == port)
+		if (this->_binds[i]->isHost(host) && this->_binds[i]->getPort() == port)
 			return (*this->_binds[i]);
 	}
 	Bind *bind = new Bind(host, port);
