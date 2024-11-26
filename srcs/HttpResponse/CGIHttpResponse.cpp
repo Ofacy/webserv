@@ -95,9 +95,7 @@ int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 		while ((pos = this->_read_buffer.find("\r\n")) != std::string::npos && !this->isHeaderReady()) {
 			line = this->_read_buffer.substr(0, pos);
 			if (line.empty())
-			{
 				this->_finishHeader();
-			}
 			else
 				this->_parseHeaderLine(pollfd, line);
 			this->_read_buffer.erase(0, pos + 2);
@@ -115,15 +113,16 @@ int CGIHttpResponse::_readCGI(struct pollfd &pollfd) {
 }
 
 int CGIHttpResponse::_writeCGI(struct pollfd &pollfd) {
-	int ret = write(this->_fd, this->getRequest().getBodyBuffer().c_str(), this->getRequest().getBodyBuffer().size());
-	if (ret == -1)
-		return -1;
-	if (ret != 0)
-		this->getRequest().getBodyBuffer().erase(0, ret);
-	if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty())
-	{
-		pollfd.events = POLLIN;
+	if (this->getRequest().getBodyBuffer().empty())
+		return 1;
+	int ret = send(this->_fd, this->getRequest().getBodyBuffer().c_str(), this->getRequest().getBodyBuffer().size(), MSG_NOSIGNAL);
+	if (ret == -1) {
+		this->_finish(pollfd);
+		return 1;
 	}
+	this->getRequest().getBodyBuffer().erase(0, ret);
+	if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty())
+		pollfd.events = POLLIN;
 	return (1);
 }
 
@@ -145,14 +144,14 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 		close(socket_pair[SOCKET_PARENT]);
 		if ((this->getRequest().getContentLength() > 0 && dup2(socket_pair[SOCKET_CHILD], STDIN_FILENO) == -1)
 			|| dup2(socket_pair[SOCKET_CHILD], STDOUT_FILENO) == -1)
-			exit(1);
+			std::exit(1);
 		else if (this->getRequest().getContentLength() == 0) {
 			int	fd[2];
 
 			if (pipe(fd) == -1)
-				exit(1);
+				std::exit(1);
 			if (dup2(fd[0], STDIN_FILENO) == -1)
-				exit(1);
+				std::exit(1);
 			close(fd[0]);
 			close(fd[1]);
 		}
@@ -168,7 +167,7 @@ void	CGIHttpResponse::_forkCGI(const std::string &script_path, const std::string
 		argv_c.push_back(NULL);
 		execve(cgi_path.c_str(), &(argv_c.front()), &(env_c.front()));
 		std::cerr << "Failed to execve: " << std::strerror(errno) << std::endl;
-		exit(1);
+		std::exit(1);
 	}
 	close(socket_pair[SOCKET_CHILD]);
 	this->_fd = socket_pair[SOCKET_PARENT];

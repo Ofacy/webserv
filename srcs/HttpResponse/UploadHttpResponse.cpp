@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 14:56:41 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/18 16:39:39 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 13:20:02 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,15 +54,17 @@ short UploadHttpResponse::getEvents() const {
 
 int UploadHttpResponse::update(struct pollfd &pollfd, Configuration &config) {
 	(void)config;
-	if (pollfd.events & POLLOUT)
-	{
+	if (pollfd.events & POLLOUT) {
 		int ret = write(this->_fd, this->getRequest().getBodyBuffer().c_str(), this->getRequest().getBodyBuffer().size());
-		if (ret == -1)
-			return -1;
+		if (ret == -1) {
+			if (!this->isHeaderReady())
+				this->createHeaderBuffer(500, std::map<std::string, std::string>());
+			this->setBufferDone(true);
+			return 1;
+		}
 		if (ret != 0)
 			this->getRequest().getBodyBuffer().erase(0, ret);
-		if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty())
-		{
+		if (this->getRequest().isDone() && this->getRequest().getBodyBuffer().empty()) {
 			this->setBufferDone(true);
 		}
 	}
