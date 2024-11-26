@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:52:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/23 14:57:43 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 13:35:59 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <errno.h>
+#include <cstring>
 #include <iostream>
 
 DirHttpResponse::DirHttpResponse(const DirHttpResponse &src) : AHttpResponse(src) {
@@ -29,7 +31,7 @@ DirHttpResponse::DirHttpResponse(HttpRequest &request, uint16_t status, const st
 	
 	dir = opendir(path.c_str());
 	if (dir == NULL) {
-		throw std::runtime_error("Error: could not open directory");
+		throw std::runtime_error("Error: could not open directory: " + std::string(strerror(errno)));
 	}
 	
 	body.replace(body.find("#title#"), 7, request.getUri());
@@ -61,7 +63,7 @@ std::string DirHttpResponse::_buildDirectoryElement(const std::string &file, con
 	struct stat statbuf;
 	
 	if (stat((path + "/" + file).c_str(), &statbuf) == -1) {
-		throw std::runtime_error("Error: could not get file stats");
+		return "";
 	}
 	std::stringstream ss;
 	

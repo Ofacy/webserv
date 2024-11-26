@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 12:56:59 by lcottet           #+#    #+#             */
-/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 13:29:56 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void Lexer::_tokenize(void) {
 		if (!word.empty())
 			this->_tokens.push_back(Token(WORD, word));
 	}
-	if (this->_file.fail())
+	if (this->_file.fail() && !this->_file.eof())
 		throw std::runtime_error("Failed to read file");
 }
 

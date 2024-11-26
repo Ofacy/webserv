@@ -36,7 +36,7 @@ Configuration::Configuration(const std::string &config_path) : InheritedParamete
 	}
 	Lexer lexer(file);
 	Parser parser(lexer);
-	this->parse(parser.getRoot(), std::vector<std::string>());
+	this->parse(parser.getRoot(), std::vector<std::string>(1, "server"));
 	this->addPollElement(AccessLog::getInstance());
 	this->_poll();
 }
