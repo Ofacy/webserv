@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 17:31:09 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 23:03:56 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 13:19:37 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,8 +176,7 @@ const std::pair<uint16_t, std::string>	&InheritedParameters::getReturn(void) con
 }
 
 AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const std::string &root, const std::string &uri) const {
-	if (this->_return.first != 0)
-	{
+	if (this->_return.first != 0) {
 		if (this->_return.second.empty())
 			return (this->getErrorResponse(request, this->_return.first, root));
 		return (new StatusHttpResponse(request, this->_return.first, this->_return.second));
@@ -188,21 +187,14 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 		return (this->getErrorResponse(request, 413, root));
 	request.setMaxBodySize(this->_max_body_size);
 	std::string path = root + uri;
-	if (request.getMethod() == "PUT")
-	{
+	if (request.getMethod() == "PUT") {
+		AHttpResponse *response = this->_getCGIResponse(request, path);
+		if (response)
+			return (response);
 		path = this->_upload_folder + uri;
 		if (this->_upload_folder.empty())
 			path = root + uri;
 		return new UploadHttpResponse(request, path);
-	}
-	else if (request.getMethod() == "DELETE")
-	{
-		path = this->_upload_folder + uri;
-		if (this->_upload_folder.empty())
-			path = root + uri;
-		if (unlink(path.c_str()) == -1)
-			return (this->getErrorResponse(request, 404, root));
-		return (new StatusHttpResponse(request, 200));
 	}
 	struct stat buffer;
 	if (stat(path.c_str(), &buffer) == -1)
@@ -213,6 +205,14 @@ AHttpResponse *InheritedParameters::prepareResponse(HttpRequest &request, const 
 	AHttpResponse *response = this->_getCGIResponse(request, path);
 	if (response)
 		return (response);
+	if (request.getMethod() == "DELETE") {
+		path = this->_upload_folder + uri;
+		if (this->_upload_folder.empty())
+			path = root + uri;
+		if (std::remove(path.c_str()) == -1)
+			return (this->getErrorResponse(request, 404, root));
+		return (new StatusHttpResponse(request, 200));
+	}
 	int fd = open(path.c_str(), O_RDONLY);
 	if (fd == -1)
 		return (this->getErrorResponse(request, 404, root));

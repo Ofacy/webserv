@@ -6,7 +6,7 @@
 /*   By: lcottet <lcottet@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 17:53:36 by bwisniew          #+#    #+#             */
-/*   Updated: 2024/11/25 23:30:03 by lcottet          ###   ########lyon.fr   */
+/*   Updated: 2024/11/26 13:20:02 by lcottet          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,10 @@ int AHttpResponse::writeResponse(int fd) {
 	int ret = 0;
 	if (this->_write_buffer.empty())
 		return (this->isBufferDone() ? 0 : 1);
-	ret = send(fd, this->_write_buffer.c_str(), this->_write_buffer.size(), 0);
+	ret = send(fd, this->_write_buffer.c_str(), this->_write_buffer.size(), MSG_NOSIGNAL);
 	if (ret == -1) {
-		return (-1);
+		this->setBufferDone(true);
+		return (1);
 	}
 	this->_content_length += ret;
 	this->_write_buffer.erase(0, ret);
